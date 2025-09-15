@@ -1,0 +1,62 @@
+#!/bin/env rin
+
+## A script that draws a shape on the terminal.
+
+# Create the constants.
+$ row_count 8 SET
+$ col_count 8 SET
+$ on 0 SET
+$ off _ SET
+$ count row_count col_count GETN * SET
+
+# Create the board.
+$ i INIT
+*
+$ x i GET CAT off GET SET
+$ i INC count GET < IF LOOP THEN
+
+# Add the shape on the board.
+$ x 1 col_count GET 1 * + CAT on GET SET
+$ x 2 col_count GET 1 * + CAT on GET SET
+$ x 5 col_count GET 1 * + CAT on GET SET
+$ x 6 col_count GET 1 * + CAT on GET SET
+
+$ i 0 SET
+*
+$ x i col_count GETN 2 * + CAT on GET SET
+$ i INC 0 7 RANGE IF LOOP THEN
+
+$ i 0 SET
+*
+$ x i col_count GETN 3 * + CAT on GET SET
+$ i INC 0 7 RANGE IF LOOP THEN
+
+$ i 0 SET
+*
+$ x i col_count GETN 4 * + CAT on GET SET
+$ i INC 0 7 RANGE IF LOOP THEN
+
+$ i 1 SET
+*
+$ x i col_count GETN 5 * + CAT on GET SET
+$ i INC 1 6 RANGE IF LOOP THEN
+
+$ i 2 SET
+*
+$ x i col_count GETN 6 * + CAT on GET SET
+$ i INC 2 5 RANGE IF LOOP THEN
+
+$ i 3 SET
+*
+$ x i col_count GETN 7 * + CAT on GET SET
+$ i INC 3 4 RANGE IF LOOP THEN
+
+# Draw the board.
+$ i INIT
+*
+$ is_last i col_count GETN % col_count GET 1 - = SET
+$ x i GET CAT is_last GETN IF ECHO ELSE ECHON THEN
+$ i INC count GET < IF LOOP THEN
+
+*
+$ LINEAR IF ECHO

@@ -1,0 +1,22 @@
+# This file is used by: https://github.com/Kapendev/closed
+
+[default]
+-o=../example
+-I=../source
+-L=-lraylib
+# Those lines work for me. Use -s=custom to fix any errors.
+-I=../../joka/source
+-L=-L../../raylib/lib
+
+[default2]
+-o=./example
+-I=../source
+-L=-lraylib
+# Those lines work for me. Use -s=custom to fix any errors.
+-I=../../joka/source
+-L=-L../../raylib/lib
+
+[custom]
+-o=../example
+-I=../source
+-L=-lraylib

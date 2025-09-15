@@ -1,0 +1,15 @@
+#!/bin/env rin
+
+## A script that serves as a classic hello-world program, introducing the structure of a Parin script.
+
+# A comment.
+* label
+| Hello world!
+| This is a text line.
+| The next is an expression line.
+$ end JUMP
+
+| You can't see me...
+
+* end
+| JUMP goes to the label with the given name.
