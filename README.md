@@ -1,4 +1,3 @@
-Reference point parin project
+# todo list app
 
-code is all kaps
-https://github.com/Kapendev/parin
+goal is a deeply nested, unix-porn friendly, with a dumb file format todo list
