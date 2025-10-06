@@ -4,6 +4,9 @@ struct todolist{
 	string[] items;
 	bool[] crossed;
 	void sanitize(){
+		if(crossed.length<items.length){
+			crossed.length=items.length;
+		}
 	}
 }
 todolist[][] openkantban(string where){

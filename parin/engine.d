@@ -1784,7 +1784,8 @@ void openUrl(IStr url = "https://github.com/Kapendev/parin") {
 /// Returns true if the assets path is currently in use when loading.
 extern(C)
 bool isUsingAssetsPath() {
-    return cast(bool) (engineState.flags & EngineFlag.isUsingAssetsPath);
+    return false;
+    //return cast(bool) (engineState.flags & EngineFlag.isUsingAssetsPath);
 }
 
 /// Sets whether the assets path should be in use when loading.

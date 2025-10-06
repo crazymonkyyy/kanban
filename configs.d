@@ -1,14 +1,32 @@
-#!opend -unittest -main -run app.d
+// ##config strings
+enum titlefontname="Noto Sans";
+enum textfontname="Noto Sans";
+enum textsize=18;
+enum colorschemename="Solarized-Dark";
+enum layout="Justified";
+enum boxstyle="Rounded-30";
+//---
+import std;
+// ##geometry 
+static assert(boxstyle="Rounded-30");
+// ##layout code
+static assert(layout=="Justified");
+// ##colorcode
+static assert(colorschemename=="Solarized-Dark");
+
+// ##fontcode
 enum fallbackfont="Noto Sans";
 enum verbose=false;
+//enum standardpath="~/.local/share/fonts/";
 auto standardpath()=>expandTilde("~/.local/share/fonts/");
 enum googleapi="https://fonts.googleapis.com/css?family=";
 enum magicstring="src: url(";
-//---
-import std;
+string titlefontpath()=>findfont(titlefontname);
+string textfontpath()=>findfont(textfontname);
+
 string exe(string s)=>executeShell(s).output;
-bool exists(string s){
-	if(s[0]=='.'){s=getcwd~s[1..$];}
+bool exists(ref string s){
+	if(s.length>=2 && s[0..2]=="./"){s=getcwd~s[1..$];}
 	if(s[0]=='~'){
 		return std.file.exists(expandTilde(s));
 	} else {
@@ -16,7 +34,10 @@ bool exists(string s){
 }}
 string findfont(string font=""){
 	if(font.length==0){font=fallbackfont;}
-	if(font[0]=='~'||font[0]=='/'||font[0]=='.')return font;//if it looks like a file, user error if it fails
+	if(font[0]=='~'||font[0]=='/'||font[0]=='.'){//if it looks like a file, user error if it fails
+		exists(font);
+		return font;
+	}
 	string file=standardpath~(font.filter!(not!(std.ascii.isWhite)).map!(a=>std.ascii.toLower(a))).to!string~".ttf";
 	if(exists(file)){
 		if(verbose){("found:"~file).writeln;}
@@ -56,12 +77,4 @@ unittest{
 	assert(findfont()=="~/.local/share/fonts/notosans.ttf");
 	assert(exists("~/.local/share/fonts/notosans.ttf"));
 }
-static if(false){//pointless downloads and prints
-unittest{
-	"Noto Sans cuneiFoRm".findfont.writeln;
-	"Bitcount Grid Double Ink".findfont.writeln;
-	"Bebas Neue".findfont.writeln;
-	"Bungee Spice".findfont.writeln;
-	"Satisfy".findfont.writeln;
-	"Righteous".findfont.writeln;
-}}
+

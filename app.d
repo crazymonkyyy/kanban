@@ -8,6 +8,8 @@ int[] offsetx;
 int offsety;
 void ready(){
 	data=openkantban(file);
+	initdrawing;
+	offsetx.length=data.length;
 }
 bool update(float dt){
 	draw(data,offsetx,offsety);

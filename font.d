@@ -17,7 +17,8 @@ void ready(){
 	//assert(rl.isFontValid(font));
 	//font=loadFont(findfont("Righteous"),32);
 	//font=loadFont("/home/monkyyy/.local/share/fonts/notosans.ttf",32);
-	font=loadFont(findfont("Bitcount Grid Double Ink"),64);
+	//findfont("Bungee Spice").writeln;
+	font=loadFont(findfont("Bungee Spice"),64);
 	assert(font.isValid);
 }
 bool update(float dt){
