@@ -29,9 +29,10 @@ void watchfile(Duration iolimit=dur!"msecs"(500),F)(string file, F func){
 	
 	auto w = new DirectoryWatcher(FilePath("."),file,false,(path, op) {
 		static SysTime io;
-		if(path.path==file && maxwatch(io,(path.path).timeLastModified,iolimit)){
+		if(path.path.length>2&&path.path[$-2..$]==".d"){
+		if(/*path.path==file &&*/ maxwatch(io,(path.path).timeLastModified,iolimit)){
 			func();
-	}});
+	}}});
 	getThisThreadEventLoop().run(() => killme);
 }
 __gshared killme=false;

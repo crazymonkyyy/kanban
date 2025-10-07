@@ -3,6 +3,7 @@ import parin;
 import configs;
 FontId textfont;
 FontId titlefont;
+
 //static this(){
 void initdrawing(){
 	//setIsUsingAssetsPath(false); //I set to false in engine
@@ -12,19 +13,22 @@ void initdrawing(){
 	assert(titlefont.isValid);
 }
 
+int colorindex(int x,int y)=>x+y*2;
+
 void draw(todolist[][] data,int[] xs,int ys){
-	foreach(y,list;data){
-	foreach(x,e;list){
-		e.draw(Vec2(300*(x-xs[ys]),300*(y-ys)));
+	auto r=estimate(data[0][0]);
+	foreach(int y,list;data){
+	foreach(int x,e;list){
+		e.draw(Vec2((r.x+r.x/5)*(x-xs[ys]),(r.y+r.y/5)*(y-ys)),colorindex((x-xs[ys]),(y-ys)));
 	}}
 	//data[0][0].draw(Vec2(300,300));
 }
-Vec2 estimate(todolist data)=>Vec2(450,900);
-void draw(todolist data, Vec2 where){
+Vec2 estimate(todolist data)=>Vec2(300,400);
+void draw(todolist data, Vec2 where, int colorindex){
 	data.sanitize;
 	auto e=estimate(data);
 	auto r=Rect(where.x,where.y,e.x,e.y);
-	drawrounded(r,red);
+	drawrounded(r,red,cyan);
 	data.title.drawtitle(r);
 	import std;
 	foreach(i;0..cast(int)data.items.length){
@@ -32,11 +36,11 @@ void draw(todolist data, Vec2 where){
 	}
 }
 enum roundness=90.0;
-enum background=cyan;
-void drawrounded(Rect r, Color c){
+//enum background=cyan;
+void drawrounded(Rect r, Color c1,Color c2){
 	float round=roundness/min(r.size.x,r.size.y);
-	rl.DrawRectangleRounded(r.toRl,round,9,background.toRl);
-	rl.DrawRectangleRoundedLinesEx(r.toRl,round,9, 10,c.toRl);
+	rl.DrawRectangleRounded(r.toRl,round,9,c2.toRl);
+	rl.DrawRectangleRoundedLinesEx(r.toRl,round,9, 10,c1.toRl);
 }
 void drawtitle(string s,Rect r){
 	//drawRect(Rect(r.x+15,r.y+15,300,30));

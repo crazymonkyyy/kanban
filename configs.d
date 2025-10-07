@@ -8,7 +8,7 @@ enum boxstyle="Rounded-30";
 //---
 import std;
 // ##geometry 
-static assert(boxstyle="Rounded-30");
+static assert(boxstyle=="Rounded-30");
 // ##layout code
 static assert(layout=="Justified");
 // ##colorcode
