@@ -47,6 +47,7 @@ void main(string[] s){
 	writeln("trying to run:",s[1]);
 	watchfile(s[1],(){
 		"---".writeln;
+		exe("opend -unittest -run "~s[1]);
 		exe("opend -run "~s[1]);
 	});
 }
