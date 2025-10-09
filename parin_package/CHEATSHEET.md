@@ -5,60 +5,119 @@ If you notice anything missing or want to contribute, feel free to open an [issu
 
 ## 📦 `parin.engine`
 
-### 🚀 Basic
+### Basic
 
 ```d
+// Time-related functions
+bool vsync();
+void setVsync(bool value);
 int fps();
+int fpsMax();
+void setFpsMax(int value);
 float deltaTime();
 double elapsedTime();
 long elapsedTickCount();
 
+// Screen-related functions
 int screenWidth();
 int screenHeight();
 Vec2 screenSize();
+
+// Window-related functions
 int windowWidth();
 int windowHeight();
 Vec2 windowSize();
-int resolutionWidth();
-int resolutionHeight();
-Vec2 resolution();
-
-void setBackgroundColor(Rgba value);
-void setBorderColor(Rgba value);
-void lockResolution(int width, int height);
-void unlockResolution();
-void toggleResolution(int width, int height);
 bool isWindowResized();
 void setWindowMinSize(int width, int height);
 void setWindowMaxSize(int width, int height);
 Fault setWindowIconFromFiles(IStr path);
-
-bool isPixelSnapped();
-void setIsPixelSnapped(bool value);
-bool isPixelPerfect();
-void setIsPixelPerfect(bool value);
+void setBackgroundColor(Rgba value);
+void setBorderColor(Rgba value);
 bool isFullscreen();
 void setIsFullscreen(bool value);
 void toggleIsFullscreen();
 bool isCursorVisible();
 void setIsCursorVisible(bool value);
 void toggleIsCursorVisible();
+
+// Resolution-related functions
+int resolutionWidth();
+int resolutionHeight();
+Vec2 resolution();
+void lockResolution(int width, int height);
+void unlockResolution();
+void toggleResolution(int width, int height);
+
+// Drawing-related functions
+bool isPixelSnapped();
+void setIsPixelSnapped(bool value);
+bool isPixelPerfect();
+void setIsPixelPerfect(bool value);
 bool isEmptyTextureVisible();
 void setIsEmptyTextureVisible(bool value);
 bool isEmptyFontVisible();
 void setIsEmptyFontVisible(bool value);
+Filter defaultFilter();
+void setDefaultFilter(Filter value);
+Wrap defaultWrap();
+void setDefaultWrap(Wrap value);
+TextureId defaultTexture();
+void setDefaultTexture(TextureId value);
+FontId defaultFont();
+void setDefaultFont(FontId value);
+
+// Randomness-related functions
+int randi();
+float randf();
+void randomize();
+void setRandomSeed(int value);
+
+// Frame allocator functions
+void* frameMalloc(Sz size, Sz alignment);
+void* frameRealloc(void* ptr, Sz oldSize, Sz newSize, Sz alignment);
+T* frameMakeBlank(T)();
+T* frameMake(T)(const(T) value = T.init);
+T[] frameMakeSliceBlank(T)(Sz length);
+T[] frameMakeSlice(T)(Sz length, const(T) value = T.init);
+
+// Debug-related functions
+bool isLoggingLoadSaveFaults();
+void setIsLoggingLoadSaveFaults(bool value);
+bool isLoggingMemoryTrackingInfo();
+void setIsLoggingMemoryTrackingInfo(bool value, IStr filter = "");
+bool isDebugMode();
+void setIsDebugMode(bool value);
+void toggleIsDebugMode();
+void setDebugModeKey(Keyboard value);
+
+// Scheduling-related functions
+TaskId every(float interval, EngineUpdateFunc func, int count = -1, bool canCallNow = false);
+void cancel(TaskId id);
+
+// Path-related functions
 bool isUsingAssetsPath();
 void setIsUsingAssetsPath(bool value);
-
-IStr[] envArgs();
-IStr[] droppedFilePaths();
 IStr assetsPath();
 IStr toAssetsPath(IStr path);
+void setAssetsPath(IStr path);
+
+// Resource-related functions
+Texture toTexture(const(ubyte)[] from, IStr ext = ".png");
+Font toFont(const(ubyte)[] from, int size, int runeSpacing = -1, int lineSpacing = -1, IStr32 runes = null, IStr ext = ".ttf");
+Font toFontAscii(Texture from, int tileWidth, int tileHeight);
+TextureId toTextureId(Texture from);
+FontId toFontId(Font from);
+SoundId toSoundId(Sound from);
+
+// Other
+Flip oppositeFlip(Flip flip, Flip fallback);
+Vec2 measureTextSize(FontId font, IStr text, DrawOptions options = DrawOptions(), TextOptions extra = TextOptions());
+IStr[] envArgs();
+IStr[] droppedFilePaths();
 void openUrl(IStr url = "https://github.com/Kapendev/parin");
-void freeEngineResources();
 ```
 
-### 🎮 Input
+### Input
 
 ```d
 bool isDown(char key);
@@ -79,6 +138,7 @@ bool isReleased(Gamepad key, int id = 0);
 Vec2 wasd();
 Vec2 wasdPressed();
 Vec2 wasdReleased();
+
 Vec2 mouse();
 Vec2 deltaMouse();
 float deltaWheel();
@@ -87,7 +147,7 @@ Keyboard dequeuePressedKey();
 dchar dequeuePressedRune();
 ```
 
-### 🖼️ Drawing
+### Drawing
 
 ```d
 void drawRect(Rect area, Rgba color = white);
@@ -99,18 +159,33 @@ void drawLine(Line area, float size, Rgba color = white);
 
 void drawTexture(TextureId texture, Vec2 position, DrawOptions options = DrawOptions());
 void drawTextureArea(TextureId texture, Rect area, Vec2 position, DrawOptions options = DrawOptions());
+void drawTextureArea(Rect area, Vec2 position, DrawOptions options = DrawOptions());
 void drawTextureSlice(TextureId texture, Rect area, Rect target, Margin margin, bool canRepeat, DrawOptions options = DrawOptions());
-void drawRune(FontId font, dchar rune, Vec2 position, DrawOptions options = DrawOptions());
-void drawText(FontId font, IStr text, Vec2 position, DrawOptions options = DrawOptions(), TextOptions extra = TextOptions());
-void drawViewport(Viewport viewport, Vec2 position, DrawOptions options = DrawOptions());
-void drawViewportArea(Viewport viewport, Rect area, Vec2 position, DrawOptions options = DrawOptions());
+void drawTextureSlice(Rect area, Rect target, Margin margin, bool canRepeat, DrawOptions options = DrawOptions());
 
-void drawDebugText(IStr text, Vec2 position, DrawOptions options = DrawOptions(), TextOptions extra = TextOptions());
-void drawDebugEngineInfo(Vec2 screenPoint, Camera camera = Camera(), DrawOptions options = DrawOptions());
-void drawDebugTileInfo(int tileWidth, int tileHeight, Vec2 screenPoint, Camera camera = Camera(), DrawOptions options = DrawOptions());
+void drawRune(FontId font, dchar rune, Vec2 position, DrawOptions options = DrawOptions());
+void drawRune(dchar rune, Vec2 position, DrawOptions options = DrawOptions());
+Vec2 drawText(FontId font, IStr text, Vec2 position, DrawOptions options = DrawOptions(), TextOptions extra = TextOptions());
+Vec2 drawText(IStr text, Vec2 position, DrawOptions options = DrawOptions(), TextOptions extra = TextOptions());
+
+void drawViewport(ref Viewport viewport, Vec2 position, DrawOptions options = DrawOptions());
+void drawViewportArea(ref Viewport viewport, Rect area, Vec2 position, DrawOptions options = DrawOptions());
+
+void drawDebugEngineInfo(Vec2 screenPoint, Camera camera = Camera(), DrawOptions options = DrawOptions(), bool isLogging = false);
+void drawDebugTileInfo(int tileWidth, int tileHeight, Vec2 screenPoint, Camera camera = Camera(), DrawOptions options = DrawOptions(), bool isLogging = false);
+
+void dprintfln(A...)(IStr fmtStr, A args);
+void dprintln(A...)(A args);
+IStr dprintBuffer();
+void setDprintPosition(Vec2 value);
+void setDprintOptions(DrawOptions value);
+void setDprintLineCountLimit(Sz value);
+void setDprintVisibility(bool value);
+void toggleDprintVisibility();
+void clearDprintBuffer();
 ```
 
-### 🔊 Sound
+### Sound
 
 ```d
 void playSound(SoundId sound);
@@ -120,34 +195,41 @@ void resumeSound(SoundId sound);
 void startSound(SoundId sound);
 void toggleSoundIsActive(SoundId sound);
 void toggleSoundIsPaused(SoundId sound);
+
+float masterVolume();
+void setMasterVolume(float value);
 ```
 
-### 💾 Loading & Saving
+### Loading & Saving
 
 ```d
 TextureId loadTexture(IStr path);
-FontId loadFont(IStr path, int size, int runeSpacing = -1, int lineSpacing = -1, IStr32 runes = "");
+FontId loadFont(IStr path, int size, int runeSpacing = -1, int lineSpacing = -1, IStr32 runes = null);
 FontId loadFontFromTexture(IStr path, int tileWidth, int tileHeight);
 SoundId loadSound(IStr path, float volume, float pitch, bool canRepeat = false, float pitchVariance = 1.0f);
+Fault lastLoadFault();
 
-Fault loadRawTextIntoBuffer(IStr path, ref LStr buffer);
-Maybe!LStr loadRawText(IStr path);
 Maybe!IStr loadTempText(IStr path);
+Maybe!LStr loadRawText(IStr path);
+Fault loadRawTextIntoBuffer(L = LStr)(IStr path, ref L listBuffer);
 Fault saveText(IStr path, IStr text);
+
+BStr prepareTempText();
 ```
 
-### 🎲 Randomness
+### Data Structures
 
 ```d
-int randi();
-float randf();
-void randomize();
-void setRandomSeed(int value);
-```
+struct Margin {
+    int left;
+    int top;
+    int right;
+    int bottom;
 
-### 🧺 Data Structures
+    this(int left, int top, int right, int bottom);
+    this(int left);
+}
 
-```d
 struct DrawOptions {
     Vec2 origin;
     Vec2 scale;
@@ -156,11 +238,11 @@ struct DrawOptions {
     Hook hook;
     Flip flip;
 
-    this(float rotation);
-    this(Vec2 scale);
-    this(Rgba color);
+    this(float rotation, Hook hook = Hook.topLeft);
+    this(Vec2 scale, Hook hook = Hook.topLeft);
+    this(Rgba color, Hook hook = Hook.topLeft);
+    this(Flip flip, Hook hook = Hook.topLeft);
     this(Hook hook);
-    this(Flip flip);
 }
 
 struct TextOptions {
@@ -242,8 +324,10 @@ struct Camera {
     ref float y();
     Vec2 sum();
     Hook hook();
-    Vec2 origin(Viewport viewport = Viewport());
-    Rect area(Viewport viewport = Viewport());
+    Vec2 origin();
+    Vec2 origin(ref Viewport viewport);
+    Rect area();
+    Rect area(ref Viewport viewport);
     Vec2 topLeftPoint();
     Vec2 topPoint();
     Vec2 topRightPoint();
@@ -260,9 +344,28 @@ struct Camera {
     void attach();
     void detach();
 }
+
+struct Viewport {
+    rl.RenderTexture2D data;
+    Rgba color;
+    Blend blend;
+    bool isAttached;
+
+    this(Rgba color, Blend blend = Blend.alpha);
+    bool isEmpty();
+    int width();
+    int height();
+    Vec2 size();
+    void resize(int newWidth, int newHeight);
+    void attach();
+    void detach();
+    void setFilter(Filter value);
+    void setWrap(Wrap value);
+    void free();
+}
 ```
 
-### 📌 Constants
+### Constants
 
 ```d
 enum Flip : ubyte {
@@ -298,6 +401,33 @@ enum Blend : ubyte {
 
 enum Keyboard : ushort {
     none,
+    apostrophe,
+    comma,
+    minus,
+    period,
+    slash,
+    n0,
+    n1,
+    n2,
+    n3,
+    n4,
+    n5,
+    n6,
+    n7,
+    n8,
+    n9,
+    nn0,
+    nn1,
+    nn2,
+    nn3,
+    nn4,
+    nn5,
+    nn6,
+    nn7,
+    nn8,
+    nn9,
+    semicolon,
+    equal,
     a,
     b,
     c,
@@ -324,26 +454,39 @@ enum Keyboard : ushort {
     x,
     y,
     z,
-    n0,
-    n1,
-    n2,
-    n3,
-    n4,
-    n5,
-    n6,
-    n7,
-    n8,
-    n9,
-    nn0,
-    nn1,
-    nn2,
-    nn3,
-    nn4,
-    nn5,
-    nn6,
-    nn7,
-    nn8,
-    nn9,
+    bracketLeft,
+    bracketRight,
+    backslash,
+    grave,
+    space,
+    esc,
+    enter,
+    tab,
+    backspace,
+    insert,
+    del,
+    right,
+    left,
+    down,
+    up,
+    pageUp,
+    pageDown,
+    home,
+    end,
+    capsLock,
+    scrollLock,
+    numLock,
+    printScreen,
+    pause,
+    shift,
+    shiftRight,
+    ctrl,
+    ctrlRight,
+    alt,
+    altRight,
+    win,
+    winRight,
+    menu,
     f1,
     f2,
     f3,
@@ -356,25 +499,6 @@ enum Keyboard : ushort {
     f10,
     f11,
     f12,
-    left,
-    right,
-    up,
-    down,
-    esc,
-    enter,
-    tab,
-    space,
-    backspace,
-    shift,
-    ctrl,
-    alt,
-    win,
-    insert,
-    del,
-    home,
-    end,
-    pageUp,
-    pageDown,
 }
 
 enum Mouse : ushort {
@@ -408,7 +532,7 @@ enum Gamepad : ushort {
 
 ## 📦 `parin.timer`
 
-### 🧺 Data Structures
+### Data Structures
 
 ```d
 struct Timer {
@@ -437,11 +561,29 @@ struct Timer {
 
 ## 📦 `parin.palettes`
 
-### 📌 Constants
+### Constants
 
 ```d
 enum Wisp2 : Rgba {
     black,
+    white,
+}
+
+enum Gb4 : Rgba {
+    black,
+    darkGray,
+    lightGray,
+    white,
+}
+
+enum Nes8 : Rgba {
+    black,
+    brown,
+    purple,
+    red,
+    green,
+    blue,
+    yellow,
     white,
 }
 

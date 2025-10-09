@@ -5,7 +5,7 @@ If you notice anything missing or want to contribute, feel free to open an [issu
 
 ## Getting Started
 
-This section shows how to install Parin and its dependencies using [DUB](https://dub.pm/).
+This section shows how to install Parin using [DUB](https://dub.pm/).
 To begin, make a new folder and run inside the following commands to create a new project:
 
 ```cmd
@@ -13,8 +13,7 @@ dub init -n
 dub run parin:setup
 ```
 
-If everything is set up correctly,
-there should be some new files inside the folder.
+If everything is set up correctly, there should be some new files inside the folder.
 Three of them are particularly important:
 
 * `source`: Contains the source code
@@ -31,7 +30,7 @@ void ready() {
 }
 
 bool update(float dt) {
-    drawDebugText("Hello world!", Vec2(8));
+    drawText("Hello world!", Vec2(8));
     return false;
 }
 
@@ -58,7 +57,7 @@ Here is a breakdown of how it works:
 
     ```d
     bool update(float dt) {
-        drawDebugText("Hello world!", Vec2(8));
+        drawText("Hello world!", Vec2(8));
         return false;
     }
     ```
@@ -71,7 +70,7 @@ Here is a breakdown of how it works:
 3. The Finish Function
 
     ```d
-    void finish() { }
+    void finish() {}
     ```
 
     This function is the ending point of the game.
@@ -143,6 +142,7 @@ bool isReleased(Gamepad key, int id = 0);
 Vec2 wasd();
 Vec2 wasdPressed();
 Vec2 wasdReleased();
+
 Vec2 mouse();
 Vec2 deltaMouse();
 float deltaWheel();
@@ -157,7 +157,7 @@ Below are examples showing how to use these input functions to move text.
 
     ```d
     bool update(float dt) {
-        drawDebugText("Text", mouse);
+        drawText("Text", mouse);
         return false;
     }
     ```
@@ -170,7 +170,7 @@ Below are examples showing how to use these input functions to move text.
     bool update(float dt) {
         position.x += Keyboard.right.isDown - Keyboard.left.isDown;
         position.y += Keyboard.down.isDown - Keyboard.up.isDown;
-        drawDebugText("Text", position);
+        drawText("Text", position);
         return false;
     }
     ```
@@ -183,7 +183,7 @@ Below are examples showing how to use these input functions to move text.
     bool update(float dt) {
         position.x += 'd'.isDown - 'a'.isDown;
         position.y += 's'.isDown - 'w'.isDown;
-        drawDebugText("Text", position);
+        drawText("Text", position);
         return false;
     }
     ```
@@ -195,7 +195,7 @@ Below are examples showing how to use these input functions to move text.
 
     bool update(float dt) {
         position += wasd;
-        drawDebugText("Text", position);
+        drawText("Text", position);
         return false;
     }
     ```
@@ -214,16 +214,33 @@ void drawLine(Line area, float size, Rgba color = white);
 
 void drawTexture(TextureId texture, Vec2 position, DrawOptions options = DrawOptions());
 void drawTextureArea(TextureId texture, Rect area, Vec2 position, DrawOptions options = DrawOptions());
+void drawTextureArea(Rect area, Vec2 position, DrawOptions options = DrawOptions());
 void drawTextureSlice(TextureId texture, Rect area, Rect target, Margin margin, bool canRepeat, DrawOptions options = DrawOptions());
-void drawRune(FontId font, dchar rune, Vec2 position, DrawOptions options = DrawOptions());
-void drawText(FontId font, IStr text, Vec2 position, DrawOptions options = DrawOptions(), TextOptions extra = TextOptions());
-void drawViewport(Viewport viewport, Vec2 position, DrawOptions options = DrawOptions());
-void drawViewportArea(Viewport viewport, Rect area, Vec2 position, DrawOptions options = DrawOptions());
+void drawTextureSlice(Rect area, Rect target, Margin margin, bool canRepeat, DrawOptions options = DrawOptions());
 
-void drawDebugText(IStr text, Vec2 position, DrawOptions options = DrawOptions(), TextOptions extra = TextOptions());
-void drawDebugEngineInfo(Vec2 screenPoint, Camera camera = Camera(), DrawOptions options = DrawOptions());
-void drawDebugTileInfo(int tileWidth, int tileHeight, Vec2 screenPoint, Camera camera = Camera(), DrawOptions options = DrawOptions());
+void drawRune(FontId font, dchar rune, Vec2 position, DrawOptions options = DrawOptions());
+void drawRune(dchar rune, Vec2 position, DrawOptions options = DrawOptions());
+Vec2 drawText(FontId font, IStr text, Vec2 position, DrawOptions options = DrawOptions(), TextOptions extra = TextOptions());
+Vec2 drawText(IStr text, Vec2 position, DrawOptions options = DrawOptions(), TextOptions extra = TextOptions());
+
+void drawViewport(ref Viewport viewport, Vec2 position, DrawOptions options = DrawOptions());
+void drawViewportArea(ref Viewport viewport, Rect area, Vec2 position, DrawOptions options = DrawOptions());
+
+void drawDebugEngineInfo(Vec2 screenPoint, Camera camera = Camera(), DrawOptions options = DrawOptions(), bool isLogging = false);
+void drawDebugTileInfo(int tileWidth, int tileHeight, Vec2 screenPoint, Camera camera = Camera(), DrawOptions options = DrawOptions(), bool isLogging = false);
+
+void dprintfln(A...)(IStr fmtStr, A args);
+void dprintln(A...)(A args);
+IStr dprintBuffer();
+void setDprintPosition(Vec2 value);
+void setDprintOptions(DrawOptions value);
+void setDprintLineCountLimit(Sz value);
+void setDprintVisibility(bool value);
+void toggleDprintVisibility();
+void clearDprintBuffer();
 ```
+
+Functions such as `drawTextureArea(Rect area, ...)` that don't take a texture or font will use `defaultTexture` and `defaultFont` for drawing. To change the defaults, use the `setDefaultTexture` and `setDefaultFont` functions. To change the default filtering mode for new textures, fonts or viewports, call `setDefaultFilter`.
 
 ### Draw Options
 
@@ -277,7 +294,7 @@ Below are examples showing how to use these options to change how text looks.
     bool update(float dt) {
         auto options = DrawOptions(Hook.center);
         options.scale = Vec2(4 + sin(elapsedTime * 4));
-        drawDebugText("Text", resolution * Vec2(0.5), options);
+        drawText("Text", resolution * Vec2(0.5), options);
         return false;
     }
     ```
@@ -288,10 +305,16 @@ Below are examples showing how to use these options to change how text looks.
     bool update(float dt) {
         auto options = DrawOptions(Hook.center);
         auto extra = TextOptions(fmod(elapsedTime, 2.0));
-        drawDebugText("Hello.\nThis is some text.", resolution * Vec2(0.5), options, extra);
+        drawText("Hello.\nThis is some text.", resolution * Vec2(0.5), options, extra);
         return false;
     }
     ```
+
+## Sprites & Tile Maps
+
+Sprites and tile maps can be implemented in various ways.
+To avoid enforcing a specific approach, Parin provides optional modules for these features, allowing users to include or omit them as needed.
+Parin provides sprite utilities inside the `parin.sprite` module and map utilities inside the `parin.map` module.
 
 ## Sound
 
@@ -305,6 +328,9 @@ void resumeSound(SoundId sound);
 void startSound(SoundId sound);
 void toggleSoundIsActive(SoundId sound);
 void toggleSoundIsPaused(SoundId sound);
+
+float masterVolume();
+void setMasterVolume(float value);
 ```
 
 Below are examples showing how to use these sound functions.
@@ -326,14 +352,17 @@ Parin provides a set of loading and saving functions. These include:
 
 ```d
 TextureId loadTexture(IStr path);
-FontId loadFont(IStr path, int size, int runeSpacing = -1, int lineSpacing = -1, IStr32 runes = "");
+FontId loadFont(IStr path, int size, int runeSpacing = -1, int lineSpacing = -1, IStr32 runes = null);
 FontId loadFontFromTexture(IStr path, int tileWidth, int tileHeight);
 SoundId loadSound(IStr path, float volume, float pitch, bool canRepeat = false, float pitchVariance = 1.0f);
+Fault lastLoadFault();
 
-Fault loadRawTextIntoBuffer(IStr path, ref LStr buffer);
-Maybe!LStr loadRawText(IStr path);
 Maybe!IStr loadTempText(IStr path);
+Maybe!LStr loadRawText(IStr path);
+Fault loadRawTextIntoBuffer(L = LStr)(IStr path, ref L listBuffer);
 Fault saveText(IStr path, IStr text);
+
+BStr prepareTempText();
 ```
 
 Functions that start with the word load or save will always try to read/write resources from/to the assets folder.
@@ -350,10 +379,132 @@ Managed resources are managed by the engine, meaning they get updated every fram
 
 ### Temporary Resources
 
-Temporary resources are only valid until the function that provided them is called again.
+Temporary resources are only valid for the duration of the current frame.
 
-## Sprites & Tile Maps
+## Embedding Assets
 
-Sprites and tile maps can be implemented in various ways.
-To avoid enforcing a specific approach, Parin provides optional modules for these features, allowing users to include or omit them as needed.
-Parin provides a sprite utilities inside the `parin.sprite` module and map utilities inside the `parin.map` module.
+Assets can be embedded into the binary with D's `import` feature.
+DUB projects already pass `-J=assets` to the compiler, so everything in the assets folder is available automatically. For example:
+
+```d
+auto atlas = Texture();
+
+void ready() {
+    atlas = toTexture(cast(ubyte[]) import("atlas.png"));
+    // Or add `.toTextureId()` at the end if atlas is a TextureId.
+}
+```
+
+## Frame Allocator
+
+The engine provides a frame allocator for temporary memory.
+Allocations from it only live for the current frame and are automatically cleared at the end.
+This is useful for short-lived data such as strings or small objects that only need to exist for one frame.
+
+```d
+void* frameMalloc(Sz size, Sz alignment);
+void* frameRealloc(void* ptr, Sz oldSize, Sz newSize, Sz alignment);
+T* frameMakeBlank(T)();
+T* frameMake(T)(const(T) value = T.init);
+T[] frameMakeSliceBlank(T)(Sz length);
+T[] frameMakeSlice(T)(Sz length, const(T) value = T.init);
+```
+
+The engine uses this allocator internally for functions like `loadTempText` and `prepareTempText`.
+
+## Memory Tracking
+
+Parin includes a lightweight memory tracking system that can detect leaks or invalid frees in debug builds.
+By default, leaks will be printed when the game ends only if they are detected.
+
+```d
+bool isLoggingMemoryTrackingInfo();
+void setIsLoggingMemoryTrackingInfo(bool value, IStr filter = "");
+```
+
+Example output:
+
+```
+Memory Leaks: 4 (total 699 bytes, 5 ignored)
+  1 leak, 20 bytes, source/app.d:24
+  1 leak, 53 bytes, source/app.d:31
+  2 leak, 32 bytes, source/app.d:123
+```
+
+You can filter the leak summary: only leaks with paths containing the filter string are shown.
+For example, `setIsLoggingMemoryTrackingInfo(true, "app.d")` shows only leaks with `"app.d"` in the path.
+You can also ignore specific allocations with `ignoreLeak` like this:
+
+```d
+// struct Game { int hp; int mp; }
+// Game* game;
+game = jokaMake!Game().ignoreLeak();
+```
+
+This isn't strictly a Parin feature.
+It comes from [Joka](https://github.com/Kapendev/joka), the library Parin uses for memory allocations.
+Anything allocated through Joka is automatically tracked.
+You can check whether memory tracking is active with `static if (isTrackingMemory)`, and if it is, you can inspect the current tracking state via `_memoryTrackingState`.
+`_memoryTrackingState` is thread-local, so each thread has its own separate tracking state.
+
+## Debug Mode
+
+Parin has a debug mode that toggles with the **F3** key by default.
+
+```d
+bool isDebugMode();
+void setIsDebugMode(bool value);
+void toggleIsDebugMode();
+void setDebugModeKey(Keyboard value);
+```
+
+Additionally, you can pass an `inspect` function to `runGame`. When debug mode is on, this function runs after `update` and can be used for debug tools. For example:
+
+```d
+// It assumes you are using: https://github.com/Kapendev/microui-d
+void inspect() {
+    if (beginWindow("Window", UiRect(200, 80, 350, 370))) {
+        headerAndMembers(game, 125);
+        endWindow();
+    }
+}
+mixin runGame!(ready, update, finish, 960, 540, "Parin", inspect, beginUi, endUi);
+```
+
+The above code is part of a full example in the [examples](examples/integrations/microui.d).
+
+## Scheduling
+
+A simple scheduling system exists for running functions later or at intervals.
+This is useful for timers and background tasks.
+Scheduled functions run before `update`.
+
+```d
+TaskId every(float interval, EngineUpdateFunc func, int count = -1, bool canCallNow = false);
+void cancel(TaskId id);
+```
+
+Example:
+
+```d
+import parin;
+
+auto text = "GNU!";
+
+bool updateText(float dt) {
+    text ~= '!';
+    return false;
+}
+
+void ready() {
+    lockResolution(320, 180);
+    every(1, &updateText);
+}
+
+bool update(float dt) {
+    drawText(text, Vec2(8));
+    return false;
+}
+
+mixin runGame!(ready, update, null);
+```

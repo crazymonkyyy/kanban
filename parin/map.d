@@ -1,5 +1,5 @@
 // ---
-// Copyright 2024 Alexandros F. G. Kapretsos
+// Copyright 2025 Alexandros F. G. Kapretsos
 // SPDX-License-Identifier: MIT
 // Email: alexandroskapretsos@gmail.com
 // Project: https://github.com/Kapendev/parin
@@ -11,12 +11,16 @@
 /// The `map` module provides a simple and fast tile map.
 module parin.map;
 
-import joka.ascii;
+import parin.joka.ascii;
 import parin.engine;
 
 @safe nothrow:
 
-alias TileMapLayer = Grid!short;
+enum maxTileMapLayerRowColCount = 192;
+enum maxTileMapLayerCapacity = maxTileMapLayerRowColCount * maxTileMapLayerRowColCount;
+
+alias TileMapLayerData = FixedList!(short, maxTileMapLayerCapacity);
+alias TileMapLayer = Grid!(TileMapLayerData.Item, TileMapLayerData);
 alias TileMapLayers = List!TileMapLayer;
 
 struct Tile {
@@ -61,16 +65,18 @@ struct Tile {
     }
 
     /// Moves the tile to follow the target position at the specified speed.
-    void followPosition(Vec2 target, float speed) {
-        position = position.moveTo(target, Vec2(speed));
+    void followPosition(Vec2 target, float delta) {
+        position = position.moveTo(target, Vec2(delta));
     }
 
     /// Moves the tile to follow the target position with gradual slowdown.
-    void followPositionWithSlowdown(Vec2 target, float slowdown) {
-        position = position.moveToWithSlowdown(target, Vec2(deltaTime), slowdown);
+    void followPositionWithSlowdown(Vec2 target, float delta, float slowdown) {
+        position = position.moveToWithSlowdown(target, Vec2(delta), slowdown);
     }
 }
 
+// TODO: Think about object layer.
+//   Idea: Have an object map struct that just parses the csv again. Doing that is not slow anyway and keeps the TileMap focused.
 struct TileMap {
     TileMapLayers layers;
     Sz rowCount;
@@ -79,22 +85,22 @@ struct TileMap {
     short tileHeight;
     Vec2 position;
 
-    enum defaultRowColCount = 256;
     enum extraTileCount = 1;
 
     @safe nothrow:
 
-    this(Sz rowCount, Sz colCount, short tileWidth, short tileHeight) {
+    this(Sz rowCount, Sz colCount, short tileWidth, short tileHeight, IStr file = __FILE__, Sz line = __LINE__) {
         this.tileWidth = tileWidth;
         this.tileHeight = tileHeight;
-        resizeHard(rowCount, colCount);
+        resizeHard(rowCount, colCount, file, line);
     }
 
-    this(short tileWidth, short tileHeight) {
-        this(defaultRowColCount, defaultRowColCount, tileWidth, tileHeight);
+    this(short tileWidth, short tileHeight, IStr file = __FILE__, Sz line = __LINE__) {
+        this(maxTileMapLayerRowColCount, maxTileMapLayerRowColCount, tileWidth, tileHeight, file, line);
     }
 
     pragma(inline, true) @nogc {
+        @trusted
         ref short opIndex(Sz row, Sz col, Sz layerId = 0) {
             if (!has(row, col)) assert(0, "Tile `[{}, {}]` does not exist.".fmt(row, col));
             return layers[layerId][row, col];
@@ -104,6 +110,7 @@ struct TileMap {
             return opIndex(position.y, position.x, layerId);
         }
 
+        @trusted
         void opIndexAssign(short rhs, Sz row, Sz col, Sz layerId = 0) {
             if (!has(row, col)) assert(0, "Tile `[{}, {}]` does not exist.".fmt(row, col));
             layers[layerId][row, col] = rhs;
@@ -113,6 +120,7 @@ struct TileMap {
             return opIndexAssign(rhs, position.y, position.x, layerId);
         }
 
+        @trusted
         void opIndexOpAssign(IStr op)(T rhs, Sz row, Sz col, Sz layerId = 0) {
             if (!has(row, col)) assert(0, "Tile `[{}, {}]` does not exist.".fmt(row, col));
             mixin("layers[layerId][colCount * row + col]", op, "= rhs;");
@@ -142,52 +150,121 @@ struct TileMap {
         IVec2 gridPointAt(Vec2 worldPoint) => gridPointAt(worldPoint.x, worldPoint.y);
     }
 
-    @nogc
-    void resizeTileSize(short newTileWidth, short newTileHeight) {
-        tileWidth = newTileWidth;
-        tileHeight = newTileHeight;
+    Fault parseCsv(IStr csv, short newTileWidth, short newTileHeight, Sz layerId = 0, bool isMinZero = false, IStr file = __FILE__, Sz line = __LINE__) {
+        if (csv.length == 0) return Fault.cantParse;
+        bool canResizeHard = layerId >= layers.length;
+        while (layerId >= layers.length) {
+            layers.appendBlank(file, line);
+            layers[$ - 1].clear();
+        }
+        if (canResizeHard) resizeHard(maxTileMapLayerRowColCount, maxTileMapLayerRowColCount, file, line);
+        resize(0, 0);
+        resizeTileSize(newTileWidth, newTileHeight);
+        auto view = csv;
+        while (view.length) {
+            rowCount += 1;
+            colCount = 0;
+            if (rowCount > hardRowCount) return Fault.cantParse;
+            auto csvLine = view.skipLine();
+            while (csvLine.length) {
+                colCount += 1;
+                auto tile = csvLine.skipValue(',').toSigned();
+                if (tile.isNone || colCount > hardColCount) return Fault.cantParse;
+                layers[layerId][rowCount - 1, colCount - 1] = cast(short) (tile.xx - isMinZero);
+            }
+        }
+        return Fault.none;
     }
 
-    void resizeHard(Sz newHardRowCount, Sz newHardColCount) {
-        if (isEmpty) layers.append(TileMapLayer());
+    Fault parseCsv(IStr csv, Sz layerId = 0, bool isMinZero = false, IStr file = __FILE__, Sz line = __LINE__) {
+        return parseCsv(csv, tileWidth, tileHeight, layerId, isMinZero, file, line);
+    }
+
+    // NOTE: Doesn't support inf maps.
+    @trusted
+    Fault parseTmx(IStr tmx, IStr file = __FILE__, Sz line = __LINE__) {
+        auto layerId = 0;
+        auto view = tmx;
+        while (view.length) {
+            auto tmxLine = view.skipLine().trim();
+            auto isMapLine = tmxLine.startsWith("<map");
+            auto isDataStartLine = isMapLine ? false : tmxLine.startsWith("<data");
+            if (isMapLine) {
+                while (tmxLine.length && (tileWidth == 0 || tileHeight == 0)) {
+                    auto word = tmxLine.skipValue(" ").trim();
+                    auto isWidthWord = word.startsWith("tilewidth");
+                    auto isHeightWord = word.startsWith("tileheight");
+                    if (!isWidthWord && !isHeightWord) continue;
+                    auto value = word.split("=")[1][1 .. $ - 1].toSigned(); // NOTE: Removes `"` with `[1 .. $ - 1]`.
+                    if (value.isNone) return Fault.cantParse;
+                    if (isWidthWord) tileWidth = cast(short) value.xx;
+                    if (isHeightWord) tileHeight = cast(short) value.xx;
+                }
+            } else if (isDataStartLine) {
+                Sz csvStart, csvEnd;
+                tmxLine = view.skipLine();
+                csvStart = tmxLine.ptr - tmx.ptr;
+                while (view.length) {
+                    tmxLine = view.skipLine().trimStart();
+                    if (tmxLine.startsWith("</")) {
+                        csvEnd = tmxLine.ptr - tmx.ptr;
+                        break;
+                    }
+                }
+                if (parseCsv(tmx[csvStart .. csvEnd], layerId, true, file, line)) return Fault.cantParse;
+                layerId += 1;
+            }
+        }
+        return Fault.none;
+    }
+
+    void resizeHard(Sz newHardRowCount, Sz newHardColCount, IStr file = __FILE__, Sz line = __LINE__) {
+        if (isEmpty) {
+            layers.appendBlank(file, line);
+            layers[$ - 1].clear();
+        }
         rowCount = newHardRowCount;
         colCount = newHardColCount;
-        foreach (ref layer; layers) layer.resizeBlank(newHardRowCount, newHardColCount);
+        foreach (ref layer; layers) layer.resizeBlank(newHardRowCount, newHardColCount, file, line);
     }
 
-    @nogc
+    @safe nothrow @nogc:
+
     void resize(Sz newRowCount, Sz newColCount) {
         if (newRowCount > hardRowCount || newColCount > hardColCount) assert(0, "Count must be smaller than hard count.");
         rowCount = newRowCount;
         colCount = newColCount;
     }
 
-    @nogc
+    void resizeTileSize(short newTileWidth, short newTileHeight) {
+        tileWidth = newTileWidth;
+        tileHeight = newTileHeight;
+    }
+
     void clear() {
         foreach (ref layer; layers) layer.fill(-1);
     }
 
-    @nogc
     void clear(Sz layerId) {
         layers[layerId].fill(-1);
     }
 
-    void free() {
-        foreach (ref layer; layers) layer.free();
-        layers.free();
+    void free(IStr file = __FILE__, Sz line = __LINE__) {
+        layers.free(file, line);
     }
 
-    @nogc
-    void followPosition(Vec2 target, float speed) {
-        position = position.moveTo(target, Vec2(speed));
+    void ignoreLeak() {
+        layers.ignoreLeak();
     }
 
-    @nogc
-    void followPositionWithSlowdown(Vec2 target, float slowdown) {
-        position = position.moveToWithSlowdown(target, Vec2(deltaTime), slowdown);
+    void followPosition(Vec2 target, float delta) {
+        position = position.moveTo(target, Vec2(delta));
     }
 
-    @nogc
+    void followPositionWithSlowdown(Vec2 target, float delta, float slowdown) {
+        position = position.moveToWithSlowdown(target, Vec2(delta), slowdown);
+    }
+
     auto gridPoints(Vec2 topLeftViewPoint, Vec2 bottomRightViewPoint) {
         alias T = ushort;
         static struct Range {
@@ -230,17 +307,14 @@ struct TileMap {
         );
     }
 
-    @nogc
     auto gridPoints(Rect viewArea) {
         return gridPoints(viewArea.topLeftPoint, viewArea.bottomRightPoint);
     }
 
-    @nogc
     auto gridPoints(Camera camera) {
-        return gridPoints(camera.area);
+        return gridPoints(camera.area(resolution));
     }
 
-    @nogc
     auto tiles(Vec2 topLeftViewPoint, Vec2 bottomRightViewPoint, Sz layerId = 0) {
         alias T = ushort;
         static struct Range {
@@ -289,103 +363,35 @@ struct TileMap {
         );
     }
 
-    @nogc
     auto tiles(Rect viewArea, Sz layerId = 0) {
         return tiles(viewArea.topLeftPoint, viewArea.bottomRightPoint, layerId);
     }
 
-    @nogc
     auto tiles(Camera camera, Sz layerId = 0) {
-        return tiles(camera.area, layerId);
-    }
-
-    Fault parseCsv(IStr csv, short newTileWidth, short newTileHeight, Sz layerId = 0, bool isMinZero = false) {
-        if (csv.length == 0) return Fault.cantParse;
-        if (layerId >= layers.length) {
-            foreach (i; 0 .. layerId - layers.length + 1) layers.append(TileMapLayer());
-            resizeHard(defaultRowColCount, defaultRowColCount);
-        }
-        resize(0, 0);
-        resizeTileSize(newTileWidth, newTileHeight);
-        auto view = csv;
-        while (view.length) {
-            rowCount += 1;
-            colCount = 0;
-            if (rowCount > hardRowCount) return Fault.cantParse;
-            auto line = view.skipLine();
-            while (line.length) {
-                colCount += 1;
-                auto tile = line.skipValue(',').toSigned();
-                if (tile.isNone || colCount > hardColCount) return Fault.cantParse;
-                layers[layerId][rowCount - 1, colCount - 1] = cast(short) (tile.value - isMinZero);
-            }
-        }
-        return Fault.none;
-    }
-
-    Fault parseCsv(IStr csv, Sz layerId = 0, bool isMinZero = false) {
-        return parseCsv(csv, tileWidth, tileHeight, layerId, isMinZero);
-    }
-
-    // NOTE: Doesn't support inf maps.
-    @trusted
-    Fault parseTmx(IStr tmx) {
-        auto layerId = 0;
-        auto view = tmx;
-        while (view.length) {
-            auto line = view.skipLine().trim();
-            auto isMapLine = line.startsWith("<map");
-            auto isDataStartLine = isMapLine ? false : line.startsWith("<data");
-            if (isMapLine) {
-                while (line.length && (tileWidth == 0 || tileHeight == 0)) {
-                    auto word = line.skipValue(" ").trim();
-                    auto isWidthWord = word.startsWith("tilewidth");
-                    auto isHeightWord = word.startsWith("tileheight");
-                    if (!isWidthWord && !isHeightWord) continue;
-                    auto value = word.split("=")[1][1 .. $ - 1].toSigned(); // NOTE: Removes `"` with `[1 .. $ - 1]`.
-                    if (value.isNone) return Fault.cantParse;
-                    if (isWidthWord) tileWidth = cast(short) value.value;
-                    if (isHeightWord) tileHeight = cast(short) value.value;
-                }
-            } else if (isDataStartLine) {
-                Sz csvStart, csvEnd;
-                line = view.skipLine();
-                csvStart = line.ptr - tmx.ptr;
-                while (view.length) {
-                    line = view.skipLine(); // NOTE: No trim because it's already trimmed by Tiled.
-                    if (line.startsWith("</")) {
-                        csvEnd = line.ptr - tmx.ptr;
-                        break;
-                    }
-                }
-                if (parseCsv(tmx[csvStart .. csvEnd], layerId, true)) return Fault.cantParse;
-                layerId += 1;
-            }
-        }
-        return Fault.none;
+        return tiles(camera.area(resolution), layerId);
     }
 }
 
 @nogc {
-    void drawTileX(Texture texture, Tile tile, DrawOptions options = DrawOptions()) {
-        if (!tile.hasId || !tile.hasSize) return;
-        drawTextureAreaX(texture, tile.textureArea(texture.width / tile.width), tile.position, options);
-    }
-
     void drawTile(TextureId texture, Tile tile, DrawOptions options = DrawOptions()) {
-        drawTileX(texture.getOr(), tile, options);
+        if (!tile.hasId || !tile.hasSize) return;
+        drawTextureArea(texture, texture.width ? tile.textureArea(texture.width / tile.width) : Rect(tile.size), tile.position, options);
     }
 
-    void drawTileMapX(Texture texture, TileMap map, Rect viewArea = Rect(), DrawOptions options = DrawOptions()) {
-        if (!map.hasSize) return;
-        if (texture.isEmpty) {
+    void drawTile(Tile tile, DrawOptions options = DrawOptions()) {
+        drawTile(defaultTexture, tile, options);
+    }
+
+    void drawTileMap(TextureId texture, ref TileMap map, Rect viewArea = Rect(), DrawOptions options = DrawOptions()) {
+        if (!texture.isValid) {
             if (isEmptyTextureVisible) {
                 auto rect = Rect(map.position, map.size);
-                drawRect(rect, defaultEngineEmptyTextureColor);
-                drawHollowRect(rect, 1, black);
+                drawRect(rect, defaultEngineDebugColor1);
+                drawRect(rect, defaultEngineDebugColor2, 1);
             }
             return;
         }
+        if (!map.hasSize) return;
 
         auto hasAreaSize = viewArea.hasSize;
         auto topLeftPoint = viewArea.topLeftPoint;
@@ -407,7 +413,7 @@ struct TileMap {
                     if (id < 0) continue;
                     textureArea.position.x = (id % textureColCount) * map.tileWidth;
                     textureArea.position.y = (id / textureColCount) * map.tileHeight;
-                    drawTextureAreaX(
+                    drawTextureArea(
                         texture,
                         textureArea,
                         map.position + Vec2(col * map.tileWidth, row * map.tileHeight),
@@ -418,11 +424,15 @@ struct TileMap {
         }
     }
 
-    void drawTileMap(TextureId texture, TileMap map, Rect viewArea = Rect(), DrawOptions options = DrawOptions()) {
-        drawTileMapX(texture.getOr(), map, viewArea, options);
+    void drawTileMap(ref TileMap map, Rect viewArea = Rect(), DrawOptions options = DrawOptions()) {
+        drawTileMap(defaultTexture, map, viewArea, options);
     }
 
-    void drawTileMap(TextureId texture, TileMap map, Camera camera, DrawOptions options = DrawOptions()) {
-        drawTileMapX(texture.getOr(), map, camera.area, options);
+    void drawTileMap(TextureId texture, ref TileMap map, Camera camera, DrawOptions options = DrawOptions()) {
+        drawTileMap(texture, map, camera.area(resolution), options);
+    }
+
+    void drawTileMap(ref TileMap map, Camera camera, DrawOptions options = DrawOptions()) {
+        drawTileMap(defaultTexture, map, camera.area(resolution), options);
     }
 }

@@ -2,6 +2,11 @@
 
 // [Noby Script]
 
+// I need to rewrite this one day, but eeehhhhh.
+// The problem is that things are not consistent between diffrent modes.
+// And the script is a little hard to read.
+// Maybe make nob better too.
+
 version (Windows) {
     enum emrunName = "emrun.bat";
     enum emccName = "emcc.bat";
@@ -10,140 +15,146 @@ version (Windows) {
     enum emccName = "emcc";
 }
 
-enum sourceDir   = "source";
+enum libFileData = cast(const(ubyte)[]) import("libraylib.a");
+enum shellFileData = cast(const(char)[]) import("emscripten_shell.html");
 enum assetsDir   = "assets";
-enum outputFile  = join("web", "index.html");
-enum libFile     = join("web", "libraylib.a");
-enum shellFile   = ".__default_shell__.html";
+enum webDir      = "web";
+enum outputFile  = join(webDir, "index.html");
+enum libFile     = join(webDir, "libraylib.a");
+enum shellFile   = join(webDir, "emscripten_shell.html");
+enum faviconFile = join(webDir, "favicon.ico");
 enum dubFile     = "dub.json";
 enum dubConfig   = "wasm";
 enum dubLibName  = "game_wasm";
-enum dflags      = ["-i", "-betterC", "--release"];
+enum cflags      = [
+    "-DPLATFORM_WEB",
+    "-sEXPORTED_RUNTIME_METHODS=HEAPF32,requestFullscreen",
+    "-sUSE_GLFW=3",
+    "-sERROR_ON_UNDEFINED_SYMBOLS=0"
+];
 
-enum shellFileContent = `
-<!doctype html>
-<html lang="EN-us">
-<head>
-    <title>game</title>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width">
-    <style>
-        body { margin: 0px; overflow: hidden; }
-        canvas.emscripten { border: 0px none; background-color: black; }
-
-        loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex; /* Center content horizontally and vertically */
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-            z-index: 100; /* Ensure loading indicator sits above content */
-        }
-
-        .spinner {
-            border: 16px solid #c0c0c0; /* Big */
-            border-top: 16px solid #343434; /* Small */
-            border-radius: 50%;
-            width: 120px;
-            height: 120px;
-            animation: spin 2s linear infinite;
-        }
-
-        .center {
-            position: fixed;
-            inset: 0px;
-            width: 120px;
-            height: 120px;
-            margin: auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        canvas {
-            display: none; /* Initially hide the canvas */
-        }
-    </style>
-</head>
-<body>
-    <div id="loading">
-        <div class="center">
-            <div class="spinner"></div>
-        </div>
-    </div>
-    <canvas class=emscripten id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
-    <p id="output" />
-    <script>
-        var Module = {
-            canvas: (function() {
-                var canvas = document.getElementById('canvas');
-                return canvas;
-            })(),
-            preRun: [function() {
-                // Show loading indicator
-                document.getElementById("loading").style.display = "block";
-            }],
-            postRun: [function() {
-                // Hide loading indicator and show canvas
-                document.getElementById("loading").style.display = "none";
-                document.getElementById("canvas").style.display = "block";
-            }]
-        };
-    </script>
-    {{{ SCRIPT }}}
-</body>
-</html>
-`[1 .. $];
-
-int main() {
-    auto isSimpProject = !dubFile.isX;
-    // Check if the files that are needed exist.
-    if (!sourceDir.isX) { echof("Folder `%s` doesn't exist. Create one.", sourceDir); return 1; }
-    if (!assetsDir.isX) { echof("Folder `%s` doesn't exist. Create one.", assetsDir); return 1; }
-    if (!libFile.isX)   { echof("File `%s` doesn't exist. Download it from raylib releases.", libFile); return 1; }
-    clear(".", ".o");
+int doDefaultProject(IStr sourceDir, bool isSimpProject) {
     // Compile the game.
     if (isSimpProject) {
-        IStr[] args = ["ldc2", "-c", "-checkaction=halt", "-mtriple=wasm32-unknown-unknown-wasm", "I" ~ sourceDir];
-        args ~= dflags;
-        foreach (path; ls(sourceDir)) if (path.endsWith(".d")) args ~= path;
+        IStr[] args = ["ldc2", "-i", "-c", "-mtriple=wasm32-unknown-unknown-wasm", "-checkaction=halt", "-betterC", "--release"];
+        args ~= "-I=" ~ sourceDir;
+        args ~= "-J=" ~ join(sourceDir, "parin");
+        foreach (path; ls(sourceDir)) if (path.endsWith(".d")) { args ~= path; }
         if (cmd(args)) return 1;
     } else {
         if (cmd("dub", "build", "--compiler", "ldc2", "--build", "release", "--config", dubConfig)) return 1;
     }
-    // Check if the assets folder is empty because emcc will cry about it.
-    paste(shellFile, shellFileContent);
-    bool isAssetsDirEmpty = true;
-    foreach (path; ls(assetsDir)) {
-        if (path.isF) { isAssetsDirEmpty = false; break; }
-    }
     // Build the web app.
     IStr dubLibFile = "";
-    foreach (path; ls) {
-        if (path.findStart(dubLibName) != -1) { dubLibFile = path; break; }
+    IStr[] args = [emccName, "-o", outputFile, libFile];
+    args ~= "--shell-file";
+    args ~= shellFile;
+    args ~= cflags;
+    // Check if the assets folder is empty because emcc will cry about it.
+    if (assetsDir.isX) {
+        foreach (path; ls(assetsDir, true)) {
+            if (path.isF) {
+                args ~= "--preload-file";
+                args ~= assetsDir;
+                break;
+            }
+        }
     }
-    IStr[] args = [emccName, "-o", outputFile, libFile, "-DPLATFORM_WEB", "-s", "USE_GLFW=3", "-s", "ERROR_ON_UNDEFINED_SYMBOLS=0", "--shell-file", shellFile];
-    if (!isAssetsDirEmpty) { args ~= "--preload-file"; args ~= assetsDir; }
     if (isSimpProject) {
         foreach (path; ls) if (path.endsWith(".o")) args ~= path;
     } else {
+        foreach (path; ls) if (path.findStart(dubLibName) != -1) { dubLibFile = path; break; }
         args ~= dubLibFile;
     }
-    if (cmd(args)) {
-        rm(shellFile);
-        rm(dubLibFile);
-        clear(".", ".o");
-        return 1;
-    }
-    rm(shellFile);
+    auto result = cmd(args);
+    clear(".", ".o");
     rm(dubLibFile);
+    return result;
+}
+
+int doGcProject(IStr sourceDir, bool isSimpProject) {
+    // Both DUB and no-DUB projects work the same because I don't care and you should vendor things anyway imo lololol.
+    // The are some hacks here. One of them is that we need to have the package folders of parin and joka.
+
+    IStr parinPackagePath = "parin_package";
+    if (!parinPackagePath.isX) parinPackagePath = join(webDir, "parin_package");
+    auto parinPackageSourcePath = join(parinPackagePath, "source");
+
+    IStr jokaPackagePath = "joka_package";
+    if (!jokaPackagePath.isX) jokaPackagePath = join(webDir, "joka_package");
+    auto jokaPackageSourcePath = join(jokaPackagePath, "source");
+
+    auto webPackagePath = join(parinPackagePath, "packages", "web");
+    auto webPackageSourcePath = join(webPackagePath, "source");
+
+    // Could be removed, but I think most poeple don't care and just want to build something.
+    if (!parinPackagePath.isX) cmd("git", "clone", "--depth", "1", "https://github.com/Kapendev/parin", parinPackagePath);
+    if (!jokaPackagePath.isX) cmd("git", "clone", "--depth", "1", "https://github.com/Kapendev/joka", jokaPackagePath);
+
+    auto hasParinInSource = false;
+    auto hasJokaInSource = false;
+    IStr[] files;
+    foreach (path; ls(sourceDir, true)) {
+        if (path.findStart("parin_package") != -1 || path.findStart("joka_package") != -1) continue;
+        if (path.findStart("parin") != -1 && path.endsWith(".d")) {
+            hasParinInSource = true;
+            files ~= path;
+            continue;
+        }
+        if (path.findStart("joka") != -1 && path.endsWith(".d")) {
+            hasJokaInSource = true;
+            files ~= path;
+            continue;
+        }
+        if (path.endsWith(".d")) files ~= path;
+    }
+    if (!hasParinInSource) {
+        foreach (path; ls(parinPackageSourcePath, true)) if (path.endsWith(".d")) files ~= path;
+    }
+    if (!hasJokaInSource) {
+        foreach (path; ls(jokaPackageSourcePath, true)) if (path.endsWith(".d")) files ~= path;
+    }
+
+    IStr[] args = ["opend", "--target=emscripten", "-of" ~ outputFile];
+    // The hack part.
+    args ~= files;
+    args ~= "-I=" ~ sourceDir;
+    if (!isSimpProject) {
+        args ~= "-I=" ~ parinPackageSourcePath;
+        args ~= "-I=" ~ jokaPackageSourcePath;
+    }
+    // The good part.
+    args ~= "-L=" ~ libFile;
+    args ~= "-L=-L" ~ webPackageSourcePath;
+    args ~= "-L=-sEXPORTED_RUNTIME_METHODS=HEAPF32,requestFullscreen";
+    args ~= "-L=-DPLATFORM_WEB";
+    args ~= "-L=-sUSE_GLFW=3";
+    args ~= "-L=-sERROR_ON_UNDEFINED_SYMBOLS=0";
+    args ~= "-L=--shell-file";
+    args ~= "-L=" ~ shellFile;
+    auto result = cmd(args);
+    clear(".", ".o");
+    return result;
+}
+
+int main(string[] mainArgs) {
+    import stdfile = std.file; // Hack import because nob.d is bad and should be rewritten in Rust.
+
+    auto isGcProject = mainArgs.length > 1 && (mainArgs[1] == "gc" || mainArgs[1] == "-gc" || mainArgs[1] == "--gc");
+    auto isSimpProject = !dubFile.isX;
+    auto sourceDir = "source";
+    if (!sourceDir.isX) sourceDir = "src";
+    if (!sourceDir.isX) sourceDir = ".";
+    if (!webDir.isX) mkdir(webDir);
+    if (!libFile.isX) stdfile.write(libFile, libFileData);
+    if (!shellFile.isX) stdfile.write(shellFile, shellFileData);
+    if (!faviconFile.isX) stdfile.write(faviconFile, ""); // Don't ask.
+    clear(".", ".o");
+    if (isGcProject) {
+        if (doGcProject(sourceDir, isSimpProject)) return 1;
+    } else {
+        if (doDefaultProject(sourceDir, isSimpProject)) return 1;
+    }
     clear(".", ".o");
     // Run the web app.
     return cmd(emrunName, outputFile);

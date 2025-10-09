@@ -49,7 +49,7 @@ void ready() {
 // Called every frame while the game is running.
 // If true is returned, then the game will stop running.
 bool update(float dt) {
-    drawDebugText("Hello world!", Vec2(8));
+    drawText("Hello world!", Vec2(8));
     return false;
 }
 
@@ -62,13 +62,15 @@ mixin runGame!(ready, update, finish);
 
 enum dubFileContent = `
 {
-    "name" : "game",
-    "description" : "A game made with Parin.",
     "authors" : ["Name"],
     "copyright" : "Copyright © 2025, Name",
+    "description" : "A game made with Parin.",
     "license" : "proprietary",
+    "name" : "game",
+    "stringImportPaths": [
+        "assets"
+    ],
     "dependencies": {
-        "joka": "*",
         "parin": "*"
     },
     "configurations": [
@@ -80,7 +82,35 @@ enum dubFileContent = `
             "name": "wasm",
             "targetType": "library",
             "targetName": "game_wasm",
-            "dflags": ["-mtriple=wasm32-unknown-unknown-wasm", "-checkaction=halt", "-betterC", "-i", "--release"]
+            "dflags": ["-mtriple=wasm32-unknown-unknown-wasm", "-checkaction=halt", "-i", "--release", "-betterC"]
+        }
+    ]
+}
+`[1 .. $];
+
+enum dubFileContentForMeTheDev = `
+{
+    "authors" : ["Name"],
+    "copyright" : "Copyright © 2025, Name",
+    "description" : "A game made with Parin.",
+    "license" : "proprietary",
+    "name" : "game",
+    "stringImportPaths": [
+        "assets"
+    ],
+    "dependencies": {
+        "parin": {"path": "../parin"}
+    },
+    "configurations": [
+        {
+            "name": "default",
+            "targetType": "executable"
+        },
+        {
+            "name": "wasm",
+            "targetType": "library",
+            "targetName": "game_wasm",
+            "dflags": ["-mtriple=wasm32-unknown-unknown-wasm", "-checkaction=halt", "-i", "--release", "-betterC"]
         }
     ]
 }
@@ -99,11 +129,19 @@ void makeBasicSetup() {
 /// The setup code for simple projects.
 int runSimpSetup(string[] args, bool isFirstRun) {
     makeBasicSetup();
+    // Find the main file and replace its content.
+    auto appDir = "src";
+    if (!appDir.isX) appDir = "source";
+    mkdir(appDir);
+    auto appFile = join(appDir, "main.d");
+    if (!appFile.isX) appFile = join(appDir, "app.d");
+    paste(appFile, appFileContent, !isFirstRun);
     return 0;
 }
 
 /// The setup code for dub projects.
 int runDubSetup(string[] args, bool isFirstRun) {
+    auto isForMeTheDev = args.length > 1 && args[1] == "dev";
     // Create basic stuff and clone the dub files.
     if (isFirstRun) {
         rm(gitFile);
@@ -119,7 +157,10 @@ int runDubSetup(string[] args, bool isFirstRun) {
     if (!appFile.isX) appFile = join(appDir, "app.d");
     paste(appFile, appFileContent, !isFirstRun);
     // Clean stuff.
-    if (isFirstRun) paste(dubFile, dubFileContent);
+    if (isFirstRun) {
+        if (isForMeTheDev) paste(dubFile, dubFileContentForMeTheDev);
+        else paste(dubFile, dubFileContent);
+    }
     restore(dubFile);
     restore(dubLockFile);
     return 0;

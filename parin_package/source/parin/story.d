@@ -1,19 +1,20 @@
 // ---
-// Copyright 2024 Alexandros F. G. Kapretsos
+// Copyright 2025 Alexandros F. G. Kapretsos
 // SPDX-License-Identifier: MIT
 // Email: alexandroskapretsos@gmail.com
 // Project: https://github.com/Kapendev/parin
 // ---
 
 // TODO: Update all the doc comments here.
+// TODO: Needs a simple rewrite. Nothing crazy, just some clean code tm stuff.
 
 /// The `story` module provides a simple and versatile dialogue system.
 module parin.story;
 
-import joka.ascii;
-import joka.containers;
-import joka.io;
-import joka.types;
+import parin.joka.ascii;
+import parin.joka.containers;
+import parin.joka.io;
+import parin.joka.types;
 
 @safe nothrow:
 
@@ -260,7 +261,7 @@ struct Story {
     }
 
     @trusted
-    Fault prepare() {
+    Fault prepare(IStr file = __FILE__, Sz line = __LINE__) {
         previousMenuResult = 0;
         resetLineIndex();
         pairs.clear();
@@ -271,24 +272,24 @@ struct Story {
         foreach (i, c; script) {
             if (c == '\n') {
                 auto pair = StoryStartEndPair(cast(uint) startIndex, cast(uint) i);
-                auto line = script[pair.a .. pair.b + 1];
-                pair.a += line.length - line.trimStart().length;
+                auto scriptLine = script[pair.a .. pair.b + 1];
+                pair.a += scriptLine.length - scriptLine.trimStart().length;
                 if (pair.a > pair.b) {
                     pair.a = pair.b;
-                    line = script[pair.a .. pair.b];
+                    scriptLine = script[pair.a .. pair.b];
                 } else {
-                    pair.b -= line.length - line.trimEnd().length;
-                    line = script[pair.a .. pair.b + 1];
+                    pair.b -= scriptLine.length - scriptLine.trimEnd().length;
+                    scriptLine = script[pair.a .. pair.b + 1];
                 }
-                auto kind = toStoryLineKind(line.length ? script[pair.a] : StoryLineKind.empty);
+                auto kind = toStoryLineKind(scriptLine.length ? script[pair.a] : StoryLineKind.empty);
                 if (kind.isNone) {
                     pairs.clear();
                     labels.clear();
                     faultPrepareIndex = prepareIndex;
                     return kind.fault;
                 }
-                if (kind.value == StoryLineKind.label) {
-                    auto name = line[1 .. $].trimStart();
+                if (kind.xx == StoryLineKind.label) {
+                    auto name = scriptLine[1 .. $].trimStart();
                     auto word = StoryWord.init;
                     auto wordRef = word[];
                     if (auto fault = wordRef.copyChars(name)) {
@@ -297,9 +298,9 @@ struct Story {
                         faultPrepareIndex = prepareIndex;
                         return fault;
                     }
-                    labels.append(StoryVariable(word, StoryValue(cast(StoryNumber) pairs.length)));
+                    labels.push(StoryVariable(word, StoryValue(cast(StoryNumber) pairs.length)), file, line);
                 }
-                pairs.append(pair);
+                pairs.push(pair, file, line);
                 prepareIndex += 1;
                 startIndex = cast(StoryNumber) (i + 1);
             }
@@ -308,14 +309,14 @@ struct Story {
         return Fault.none;
     }
 
-    Fault parse(IStr text) {
+    Fault parse(IStr text, IStr file = __FILE__, Sz line = __LINE__) {
         script.clear();
-        script.append(text);
+        script.appendSource(file, line, text);
         return prepare();
     }
 
     @trusted
-    Fault execute(IStr expression) {
+    Fault execute(IStr expression, IStr file = __FILE__, Sz line = __LINE__) {
         static FixedList!(StoryValue, defaultStoryFixedListCapacity) stack;
 
         stack.clear();
@@ -338,7 +339,7 @@ struct Story {
                     faultTokenPosition = tokenCount;
                     return tempOp.fault;
                 }
-                auto op = tempOp.value;
+                auto op = tempOp.xx;
                 final switch (op) {
                     case ADD:
                     case SUB:
@@ -552,7 +553,7 @@ struct Story {
                         if (aIndex != -1) {
                             variables[aIndex].value = db;
                         } else {
-                            variables.append(StoryVariable(a, db));
+                            variables.push(StoryVariable(a, db));
                         }
                         break;
                     case INIT:
@@ -564,7 +565,7 @@ struct Story {
                         if (aIndex != -1) {
                             variables[aIndex].value = StoryValue(0);
                         } else {
-                            variables.append(StoryVariable(a, StoryValue(0)));
+                            variables.push(StoryVariable(a, StoryValue(0)));
                         }
                         break;
                     case DROP:
@@ -681,7 +682,7 @@ struct Story {
                     faultTokenPosition = tokenCount;
                     return number.fault;
                 }
-                stack.append(StoryValue(cast(StoryNumber) number.value));
+                stack.append(StoryValue(cast(StoryNumber) number.xx));
             } else if (token.isMaybeStoryWord) {
                 auto word = StoryWord.init;
                 auto wordRef = word[];
@@ -698,16 +699,16 @@ struct Story {
         return Fault.none;
     }
 
-    Fault update() {
+    Fault update(IStr file = __FILE__, Sz line = __LINE__) {
         if (lineCount == 0) return Fault.none;
         setLineIndex(lineIndex + 1);
         while (lineIndex < lineCount && !hasPause && !hasProcedure && !hasMenu && !hasText) {
-            auto line = opIndex(lineIndex);
-            if (line.length) {
-                if (line[0] == StoryLineKind.expression) {
-                    auto fault = execute(line[1 .. $].trimStart());
+            auto scriptLine = opIndex(lineIndex);
+            if (scriptLine.length) {
+                if (scriptLine[0] == StoryLineKind.expression) {
+                    auto fault = execute(scriptLine[1 .. $].trimStart(), file, line);
                     if (fault) return fault;
-                } else if (line[0] == StoryLineKind.label) {
+                } else if (scriptLine[0] == StoryLineKind.label) {
                     setNextLabelIndex(nextLabelIndex + 1);
                 }
             }
@@ -717,25 +718,34 @@ struct Story {
         return Fault.none;
     }
 
-    Fault select(Sz i) {
+    Fault select(Sz i, IStr file = __FILE__, Sz line = __LINE__) {
         previousMenuResult = cast(StoryNumber) (i + 1);
-        return update();
+        return update(file, line);
     }
 
-    void reserve(Sz capacity) {
-        script.reserve(capacity);
-        pairs.reserve(capacity);
-        labels.reserve(capacity);
-        variables.reserve(capacity);
+    void reserve(Sz capacity, IStr file = __FILE__, Sz line = __LINE__) {
+        script.reserve(capacity, file, line);
+        pairs.reserve(capacity, file, line);
+        labels.reserve(capacity, file, line);
+        variables.reserve(capacity, file, line);
     }
 
     @nogc
-    void free() {
-        script.free();
-        pairs.free();
-        labels.free();
-        variables.free();
+    void free(IStr file = __FILE__, Sz line = __LINE__) {
+        script.free(file, line);
+        pairs.free(file, line);
+        labels.free(file, line);
+        variables.free(file, line);
         this = Story();
+    }
+
+    @nogc
+    void ignoreLeak() {
+        // TODO: Maybe think about using an arena for the story stuct.
+        script.ignoreLeak();
+        pairs.ignoreLeak();
+        labels.ignoreLeak();
+        variables.ignoreLeak();
     }
 }
 

@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"Alexandros F. G. Kapretsos"
+	],
+	"copyright": "Copyright © 2024, Alexandros F. G. Kapretsos",
+	"description": "A hello world made with Parin.",
+	"license": "MIT",
+	"name": "hello",
+	"dependencies": {
+		"parin": {"path": ".."}
+	}
+}

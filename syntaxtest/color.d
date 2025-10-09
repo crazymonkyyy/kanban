@@ -3,24 +3,9 @@ import parin;
 import std;
 enum string foo="Solarized-Dark";
 enum data=import("color.csv");
-Palette!N csvRowToPalette(Sz N)(IStr csv, Sz row = 0, Sz startCol = 0) {
-    Palette!N result = void;
 
-    auto line = csv.skipLine();
-    if (row > 0) { row -= 1; line = csv.skipLine(); }
-    auto fields = line.split(',');
-    if (startCol >= fields.length) { result[0] = blank; return result; }
-    fields = fields[startCol .. $];
-    if (fields.length != N) { result[0] = blank; return result; }
-
-    foreach (i, field; fields) {
-        auto value = field.hexToRgba();
-        if (value == blank) { result[0] = blank; return result; }
-        result[i] = value;
-    }
-    return result;
-}
 int tocolorschemerow(string s_){
+	import std;
 	auto target=s_.map!((a){
 		import std.ascii;
 		if(a==' ')return '-';
@@ -32,6 +17,7 @@ int tocolorschemerow(string s_){
 	return 136;
 }
 unittest{
+	import std;
 	"solarized dark".tocolorschemerow.writeln;
 	"Solarized-dArk".tocolorschemerow.writeln;
 	"atelier-plateau".tocolorschemerow.writeln;
@@ -40,13 +26,20 @@ unittest{
 	"black-metal".tocolorschemerow.writeln;
 	stdout.flush;
 }
+unittest{
+	
+	"dc322f".toRgba.writeln;
+}
 Palette!16 palette;
 void ready(){
-	palette=data.csvRowToPalette(foo.tocolorschemerow,1);
+	palette=data.csvRowToPalette!16(foo.tocolorschemerow,1);
+	palette[8].writeln;
 }
 bool update(float dt){
 	foreach(i,c;palette){
 		Rect(0,i*100,100,100).drawRect(c);
+		import std;
+		drawText(c.to!string,Vec2(100,i*100));
 	}
 	return false;
 }

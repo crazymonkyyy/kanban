@@ -1,0 +1,9 @@
+#!/bin/env sh
+
+app_path=./app.d
+parin_package_path=./parin_package
+
+# git clone --depth 1 https://github.com/Kapendev/parin $parin_package_path
+cp -r $parin_package_path/source/parin .
+cp $parin_package_path/examples/basics/_001_hello.d $app_path
+mkdir -p ./assets
