@@ -13,7 +13,24 @@ static assert(boxstyle=="Rounded-30");
 static assert(layout=="Justified");
 // ##colorcode
 static assert(colorschemename=="Solarized-Dark");
-
+enum data=import("color.csv");
+int tocolorschemerow(string s_){
+	import std;
+	auto target=s_.map!((a){
+		import std.ascii;
+		if(a==' ')return '-';
+		return a.toLower;
+	}).to!string;
+	foreach(i,s;data.splitter('\n').enumerate){
+		if(s[0..target.length]==target){return cast(int)i;}
+	}
+	return 136;
+}
+import parin;
+Palette!16 palette;
+void initpalette(){
+	palette=data.csvRowToPalette!16(colorschemename.tocolorschemerow,1);
+}
 // ##fontcode
 enum fallbackfont="Noto Sans";
 enum verbose=false;

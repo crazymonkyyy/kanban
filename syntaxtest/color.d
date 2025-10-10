@@ -1,7 +1,7 @@
 #!opend -unittest -main -run app.d
 import parin;
 import std;
-enum string foo="Solarized-Dark";
+enum string foo="black-metal";
 enum data=import("color.csv");
 
 int tocolorschemerow(string s_){

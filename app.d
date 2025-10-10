@@ -1,21 +1,20 @@
-/// This example serves as a classic hello world program, introducing the structure of a Parin program.
-
-import parin;
-
-// Called once when the game starts.
-void ready() {
-    lockResolution(320, 180);
+#!/bin/env -S opend -run app.d
+import parin;//game engine
+import format;//io of .kantban
+import drawing;
+enum file="TODO.kantban";
+todolist[][] data;
+int[] offsetx;
+int offsety;
+void ready(){
+	data=openkantban(file);
+	initdrawing;
+	offsetx.length=data.length;
 }
-
-// Called every frame while the game is running.
-// If true is returned, then the game will stop running.
-bool update(float dt) {
-    drawText("Hello world!", Vec2(8));
-    return false;
+bool update(float dt){
+	draw(data,offsetx,offsety);
+	return false;
 }
-
-// Called once when the game ends.
-void finish() {}
-
-// Creates a main function that calls the given functions.
+void finish(){}
 mixin runGame!(ready, update, finish);
+

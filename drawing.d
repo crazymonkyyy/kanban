@@ -11,6 +11,7 @@ void initdrawing(){
 	assert(textfont.isValid);
 	titlefont=loadFont(titlefontpath(),textsize+textsize/3);
 	assert(titlefont.isValid);
+	initpalette();
 }
 
 int colorindex(int x,int y)=>x+y*2;
@@ -39,12 +40,12 @@ enum roundness=90.0;
 //enum background=cyan;
 void drawrounded(Rect r, Color c1,Color c2){
 	float round=roundness/min(r.size.x,r.size.y);
-	rl.DrawRectangleRounded(r.toRl,round,9,c2.toRl);
-	rl.DrawRectangleRoundedLinesEx(r.toRl,round,9, 10,c1.toRl);
+	rl.DrawRectangleRounded(bk.toRl(r),round,9,bk.toRl(c2));
+	rl.DrawRectangleRoundedLinesEx(bk.toRl(r),round,9, 10,bk.toRl(c1));
 }
 void drawtitle(string s,Rect r){
 	//drawRect(Rect(r.x+15,r.y+15,300,30));
-	drawText(titlefont,s,Vec2(r.x+15,r.y+15));
+	drawText(titlefont,s,Vec2(r.x+15,r.y+15));//,palette[7]);
 }
 void drawitem(int i,string s,bool crossed,Rect r){
 	Vec2 where=Vec2(r.x+20,r.y+i*25+40);
