@@ -1,0 +1,29 @@
+# Column
+## Shopping
+- [ ] milk
+- [ ] eggs
+- [ ] bread
+- [ ] cheese
+## Work Tasks
+- [ ] write documentation
+- [x] fix bug #123
+- [x] code review
+- [ ] deploy to staging
+# Column
+## Learning
+- [ ] read D programming book
+- [ ] watch parin tutorials
+- [x] setup development environment
+## Projects
+- [ ] kanban app ui
+- [ ] base16 color implementation
+- [ ] mathematical backgrounds
+# Column
+## Completed Tasks
+- [x] setup project structure
+- [ ] implement drawing system
+- [x] add hotkey support research
+## Fixed Bugs
+- [ ] array syntax error
+- [x] drawing compilation issues
+- [x] color palette loading

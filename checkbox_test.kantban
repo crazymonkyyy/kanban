@@ -1,0 +1,47 @@
+# Checkbox Format Tests
+## Standard Format
+- [ ] unchecked item
+- [x] checked item
+- [X] checked with capital X
+
+## Flexible Spacing
+- [x ] checked with space after x
+- [ x] checked with space before x
+- [  ] unchecked with extra space
+- [xx] double x (should be checked)
+
+## Plain Format
+- plain item without checkbox
+- another plain item
+- third plain item
+
+## Mixed Formats
+- [ ] standard unchecked
+- [x] standard checked
+- [X ] capital X with space
+- [ x] space before lowercase x
+- plain item mixed in
+- [x] back to standard
+
+# Edge Cases
+## Empty and Whitespace
+- [ ]
+- [x]
+- [ ]    item with leading spaces
+- [x]	item with tab
+
+## Special Characters
+- [ ] item with "quotes"
+- [x] item with 'apostrophes'
+- [ ] item with #hashtag
+- [x] item with @ symbol
+- [ ] item with % & * symbols
+
+# Real Examples
+## Development Tasks
+- [x ] implement parser flexibility
+- [ x] add validation tests
+- [X] update documentation
+- [ ] write unit tests
+- plain todo without checkbox
+- [x] final checked item

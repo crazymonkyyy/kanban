@@ -1,0 +1,32 @@
+# Backlog
+## Bug Fixes
+- [ ] memory leak in renderer
+- [ ] crash on startup
+- [x] color palette issue
+
+## Features
+- [ ] drag and drop
+- [ ] keyboard shortcuts
+- [ ] export to json
+
+# Current Sprint
+## High Priority
+- [ ] fix critical bug
+- [x] add unit tests
+- [x ] update documentation
+
+## Medium Priority
+- [ ] refactor old code
+- [ ] optimize performance
+
+# Testing
+## Manual Tests
+- [x] test on linux
+- [ ] test on windows
+- [ ] test on mac
+
+# Complete
+## Done This Week
+- [x] implement file format
+- [x] add markdown support
+- [x] create test files
