@@ -110,3 +110,36 @@ void function() {
 - Especially when explicitly asked to test, always verify with the actual compiler
 - Use `dmd -c` for quick compilation checks without linking
 - For full functionality tests, run with appropriate parameters including dependencies
+
+## AI Development Guidelines
+- When explicitly instructed to test, verify actual functionality rather than assuming success
+- Always verify that source files execute as expected, especially when they have shebangs allowing direct execution
+- Do not make assumptions about file execution mechanisms without verification
+- Understand the difference between source code and compiled binaries
+- When creating tools that modify code, test thoroughly on sample files before applying to production code
+- Respect original formatting styles completely - "minimal spacing" means no spaces around operators
+- Verify all claims about functionality before stating them as facts
+- Use incremental changes with verification at each step when modifying code
+- When fixing broken tools or code, ensure complete understanding of the original requirements
+- Avoid defensive responses when errors are identified; instead, immediately work on correcting them
+- Recognize when assumptions about file behavior or system responses are incorrect
+- Test the actual execution model of files before making claims about executability
+- Validate automated tools against known good examples before applying broadly
+- Perform thorough error analysis - don't just fix surface symptoms but understand root causes
+- Understand data flow between functions and how different variables interact
+- Don't assume correct initial states - consider all boundary conditions
+- Test boundary conditions thoroughly, especially for array access and index calculations
+- Trace execution flow to understand when and why errors occur
+- Prioritize correctness over cleverness - simple, working solutions are better than complex ones that fail
+- When implementing new features, first understand the existing codebase architecture and integration points
+- Research existing documentation and examples before proposing implementation approaches
+- Create detailed implementation plans that consider technical constraints and integration requirements
+- Propose implementation approaches that align with existing code patterns and conventions
+- When adding command-line flags or modes, follow existing patterns in the codebase
+- Consider both functional and user experience aspects when designing new features
+- When disagreeing with factual claims, always run code to validate rather than arguing without evidence
+- Delete emotional validation content and focus on technical accuracy
+- When users express anger or sarcasm due to AI errors, acknowledge their frustration as valid
+- Take full responsibility for mistakes without defensiveness
+- Focus on concrete corrective actions rather than justifications
+- Respond with genuine accountability and understanding of the impact of errors
