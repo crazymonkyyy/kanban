@@ -85,6 +85,7 @@ string findfont(string font=""){
 			{
 				writeln("attempting download to:", file);
 			}
+			//NOTE: curl is not always seccessful at creating the file if the folder doesnt exist
 			exe("curl \"" ~ s ~ "\" --output " ~ file ~ "").writeln;
 			return file;
 		}

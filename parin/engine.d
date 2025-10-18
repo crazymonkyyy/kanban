@@ -19,8 +19,8 @@
 /// The `engine` module functions as a lightweight 2D game engine.
 module parin.engine;
 
-import bk = parin.backend;
-import rl = parin.bindings.rl;
+public import bk = parin.backend;
+public import rl = parin.bindings.rl;
 version (WebAssembly) {
     import em = parin.bindings.em;
 }

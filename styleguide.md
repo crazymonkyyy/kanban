@@ -73,3 +73,19 @@ void function() {
 - When committing changes made by AI tools, use "qwen ai" as the commit author
 - Keep track of instructions and document them in the style guide
 - Use descriptive commit messages that explain the purpose of the changes
+
+## Single Source of Truth Principle
+- Avoid duplicating struct definitions across files (e.g., the `todolist` struct should be defined once in format.d and imported where needed)
+- Reuse existing functions from format.d rather than reimplementing parsing and saving logic in tools
+- Import and use existing functionality instead of creating duplicate implementations
+- Maintain one canonical implementation of core data structures and operations
+
+## Error Handling Philosophy
+- Use minimal error handling approach similar to the original application
+- Prefer simple assertions for critical failures rather than extensive validation
+- Let errors propagate naturally rather than implementing comprehensive error reporting systems
+- Avoid creating complex error categorization systems (ValidationResult classes, etc.)
+- Focus on core functionality rather than extensive error checking and reporting
+- Maintain consistency with the minimalistic error handling approach of the original code
+- Implement fallback strategies instead of complex error reporting (e.g., try alternative approaches rather than detailed error messages)
+- Follow the style demonstrated in the findfont function as a model for error handling approach
