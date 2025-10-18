@@ -138,6 +138,17 @@ The project uses a structured AI development workflow documented in `ai_thoughts
 ### File Management
 - Avoid deleting files in `syntaxtest/` - these files serve as valuable references for understanding language features and patterns
 
+## Git and Pull Request Style
+- When making changes to align with the style guide, commit changes with descriptive messages
+- Use "qwen ai" as the commit author when making AI-assisted changes
+- Test all tools and functionality before creating pull requests
+- Include documentation of changes made in pull request descriptions
+- When creating pull requests, title them descriptively to explain the changes made
+- Reference the style guide in pull request descriptions when applying style changes
+- **DO NOT USE BRANCHES**: All work should be done directly on the main branch
+- Commit directly to main branch for all changes
+- Avoid feature branches, topic branches, or any other branching strategies
+
 ## File Format Specification
 
 ### Structure
