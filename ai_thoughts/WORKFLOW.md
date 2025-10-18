@@ -1,7 +1,7 @@
 # AI Development Workflow
 
 ## Overview
-This document outlines the standardized workflow for AI development work to ensure consistency, quality, and proper feedback loops.
+This document outlines the standardized workflow for AI development work to ensure consistency, quality, and proper feedback loops. **Branches are explicitly NOT used in this workflow.**
 
 ## Workflow Phases
 
@@ -29,7 +29,7 @@ This document outlines the standardized workflow for AI development work to ensu
 
 ### 2. Implementation Phase
 1. **Setup**
-   - Create feature branch for work
+   - Work directly on the main branch (NO BRANCHES)
    - Set up development environment
    - Ensure all dependencies are available
 
@@ -37,7 +37,7 @@ This document outlines the standardized workflow for AI development work to ensu
    - Follow implementation plan created in planning phase
    - Write clean, well-documented code
    - Adhere to existing code style and conventions
-   - Test incrementally during development
+   - Test incrementially during development
 
 3. **Testing**
    - Verify functionality works as expected
@@ -65,7 +65,7 @@ This document outlines the standardized workflow for AI development work to ensu
    - Reference relevant issues or planning documents
 
 2. **Submission**
-   - Submit PR for review
+   - Submit PR for review directly from main branch (NO BRANCHES)
    - Request review from appropriate team members
    - Address any feedback promptly and thoroughly
 
@@ -115,7 +115,7 @@ This document outlines the standardized workflow for AI development work to ensu
 - Use descriptive commit messages
 - Follow conventional commit format when possible
 - Create atomic commits for logical changes
-- Use feature branches for all work
+- **DO NOT USE FEATURE BRANCHES FOR ANY WORK**
 
 ### Testing
 - Always test with actual code execution
@@ -148,3 +148,24 @@ This document outlines the standardized workflow for AI development work to ensu
 - Focus on technical merits and requirements
 - Avoid personal opinions or preferences
 - Validate feedback with evidence when possible
+
+## Branch Policy
+
+### Explicit Prohibition
+- **BRANCHES ARE EXPLICITLY PROHIBITED** in this workflow
+- All work must be done directly on the main branch
+- No feature branches, topic branches, or any other branching strategies
+- Direct commits to main branch are the only acceptable approach
+
+### Rationale
+1. **Simplicity**: Eliminates complexity of branch management
+2. **Immediate Integration**: Changes are immediately available for testing
+3. **Reduced Merge Conflicts**: No need to resolve merge conflicts between branches
+4. **Faster Feedback**: Immediate feedback on changes without branch switching
+5. **Consistent State**: Main branch always represents latest work
+
+### Exception Handling
+- In extremely rare cases where branches might be needed, explicit approval is required
+- Any deviation from the no-branches policy must be documented and justified
+- Emergency fixes may temporarily use branches but must be immediately merged and deleted
+- All exceptions must follow the standard PR review process

@@ -66,8 +66,8 @@ Improve the incomplete file watcher implementation in odrun and odrun2 to provid
 5. **Error Handling**: Implement comprehensive error handling and recovery
 
 ### Phase 3: Integration and Testing (1 day)
-1. **Integration with odrun**: Integrate improved file watcher with odrun
-2. **Integration with odrun2**: Integrate improved file watcher with odrun2
+1. **Integration with odrun**: Integrate improved file watcher with odrun (directly on main branch, NO BRANCHES)
+2. **Integration with odrun2**: Integrate improved file watcher with odrun2 (directly on main branch, NO BRANCHES)
 3. **Unit Testing**: Write comprehensive unit tests for all functionality
 4. **Integration Testing**: Test integration with existing codebase
 5. **Performance Testing**: Test performance with various file change scenarios
@@ -75,7 +75,7 @@ Improve the incomplete file watcher implementation in odrun and odrun2 to provid
 ### Phase 4: Documentation and Deployment (0.5 days)
 1. **Documentation**: Document usage and configuration options
 2. **Examples**: Create example configurations and usage scenarios
-3. **Deployment**: Deploy improved file watcher to production
+3. **Deployment**: Deploy improved file watcher to production (direct commits to main branch)
 4. **Monitoring**: Set up monitoring for file watcher performance
 
 ## Detailed Implementation Steps
