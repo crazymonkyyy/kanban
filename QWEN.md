@@ -110,6 +110,8 @@ void function() {
 - Especially when explicitly asked to test, always verify with the actual compiler
 - Use `dmd -c` for quick compilation checks without linking
 - For full functionality tests, run with appropriate parameters including dependencies
+- Syntax tests belong in the `syntaxtest/` directory and should validate specific behaviors
+- Test programs for theoretical concepts should be placed in `syntaxtest/` to validate assumptions
 
 ## AI Development Guidelines
 - When explicitly instructed to test, verify actual functionality rather than assuming success
