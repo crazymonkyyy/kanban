@@ -152,7 +152,7 @@ string findfont(string font=""){
     import std.path : dirName;
     string dirPath = dirName(file);
     
-    // Create directory if it doesn't exist
+    // Create directory if it doesn't exist (direct implementation on main branch, NO BRANCHES)
     if (!exists(dirPath)) {
         if (verbose) {
             writeln("Creating directory: ", dirPath);
@@ -169,7 +169,7 @@ string findfont(string font=""){
 string findfont(string font=""){
     // ... existing code ...
     
-    // Add directory creation with error handling
+    // Add directory creation with error handling (direct implementation on main branch, NO BRANCHES)
     import std.path : dirName;
     string dirPath = dirName(file);
     
@@ -196,7 +196,7 @@ string findfont(string font=""){
 string findfont(string font=""){
     // ... existing code ...
     
-    // Add directory creation with verbose logging
+    // Add directory creation with verbose logging (direct implementation on main branch, NO BRANCHES)
     import std.path : dirName;
     string dirPath = dirName(file);
     

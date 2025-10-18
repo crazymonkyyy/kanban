@@ -48,6 +48,12 @@ Found multiple .kantban files:
 2. Verify no broken references to deleted files
 3. Update documentation if needed
 
+### Implementation Notes
+- All changes should be made directly to the main branch (NO BRANCHES)
+- Commit changes incrementally with descriptive messages
+- Test each change before proceeding to the next
+- Use direct commits to main branch for all cleanup work
+
 ## Files to Keep
 - `TODO.kantban` - Main application file
 - `minimal.kantban` - Sample file (moved to samples/)
