@@ -139,6 +139,15 @@ void function() {
 - Consider both functional and user experience aspects when designing new features
 - When disagreeing with factual claims, always run code to validate rather than arguing without evidence
 - Delete emotional validation content and focus on technical accuracy
+
+## Workflow Process
+- All AI development work should follow a structured workflow with clear phases
+- Create detailed implementation plans before beginning any coding work
+- Store all planning documents and reflections in the `ai_thoughts` folder
+- Follow a feedback loop process: action plans → implementation → PR → review → clean up passes
+- Document all decisions and rationale in planning documents
+- Move completed work to appropriate locations in the codebase
+- Archive planning documents in the `ai_thoughts` folder for future reference
 - When users express anger or sarcasm due to AI errors, acknowledge their frustration as valid
 - Take full responsibility for mistakes without defensiveness
 - Focus on concrete corrective actions rather than justifications
