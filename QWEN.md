@@ -135,6 +135,9 @@ The project uses a structured AI development workflow documented in `ai_thoughts
 - Syntax tests in `syntaxtest/` directory for validating concepts
 - Manual testing through direct execution of .d files
 
+### File Management
+- Avoid deleting files in `syntaxtest/` - these files serve as valuable references for understanding language features and patterns
+
 ## File Format Specification
 
 ### Structure
