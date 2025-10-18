@@ -59,52 +59,52 @@ alias em_mouse_callback_func = bool function(int eventType, const(EmscriptenMous
 alias em_touch_callback_func = bool function(int eventType, const(EmscriptenTouchEvent)* touchEvent, void* userData);
 
 struct EmscriptenMouseEvent {
-    double timestamp = 0;
-    int screenX;
-    int screenY;
-    int clientX;
-    int clientY;
-    bool ctrlKey;
-    bool shiftKey;
-    bool altKey;
-    bool metaKey;
-    ushort button;
-    ushort buttons;
-    int movementX;
-    int movementY;
-    int targetX;
-    int targetY;
-    // canvasX and canvasY are deprecated - there no longer exists a Module['canvas'] object, so canvasX/Y are no longer reported (register a listener on canvas directly to get canvas coordinates, or translate manually)
-    int canvasX;
-    int canvasY;
-    int padding;
+	double timestamp = 0;
+	int screenX;
+	int screenY;
+	int clientX;
+	int clientY;
+	bool ctrlKey;
+	bool shiftKey;
+	bool altKey;
+	bool metaKey;
+	ushort button;
+	ushort buttons;
+	int movementX;
+	int movementY;
+	int targetX;
+	int targetY;
+	// canvasX and canvasY are deprecated - there no longer exists a Module['canvas'] object, so canvasX/Y are no longer reported (register a listener on canvas directly to get canvas coordinates, or translate manually)
+	int canvasX;
+	int canvasY;
+	int padding;
 }
 
 struct EmscriptenTouchPoint {
-    int identifier;
-    int screenX;
-    int screenY;
-    int clientX;
-    int clientY;
-    int pageX;
-    int pageY;
-    bool isChanged;
-    bool onTarget;
-    int targetX;
-    int targetY;
-    // canvasX and canvasY are deprecated - there no longer exists a Module['canvas'] object, so canvasX/Y are no longer reported (register a listener on canvas directly to get canvas coordinates, or translate manually)
-    int canvasX;
-    int canvasY;
+	int identifier;
+	int screenX;
+	int screenY;
+	int clientX;
+	int clientY;
+	int pageX;
+	int pageY;
+	bool isChanged;
+	bool onTarget;
+	int targetX;
+	int targetY;
+	// canvasX and canvasY are deprecated - there no longer exists a Module['canvas'] object, so canvasX/Y are no longer reported (register a listener on canvas directly to get canvas coordinates, or translate manually)
+	int canvasX;
+	int canvasY;
 }
 
 struct EmscriptenTouchEvent {
-    double timestamp = 0;
-    int numTouches;
-    bool ctrlKey;
-    bool shiftKey;
-    bool altKey;
-    bool metaKey;
-    Array!(EmscriptenTouchPoint, 32) touches;
+	double timestamp = 0;
+	int numTouches;
+	bool ctrlKey;
+	bool shiftKey;
+	bool altKey;
+	bool metaKey;
+	Array!(EmscriptenTouchPoint, 32) touches;
 }
 
 void emscripten_set_main_loop(void* ptr, int fps, bool loop);

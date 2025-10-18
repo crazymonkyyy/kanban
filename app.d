@@ -8,18 +8,18 @@ string file = "TODO.kantban";
 todolist[][] data;
 int[] x;
 int y;
-void ready()
-{
-    // Check for command line arguments
-    auto args = envArgs();
-    if (args.length > 1)
-    {
-        file = args[1].to!string;
-    }
+void ready() {
 
-    data = openkantban(file);
-    initdrawing;
-    x.length = data.length;
+	// Check for command line arguments
+	auto args = envArgs();
+if (args.length > 1) {
+
+		file = args[1].to!string;
+	}
+
+	data = openkantban(file);
+	initdrawing;
+	x.length = data.length;
 }
 
 bool update(float dt){
@@ -42,22 +42,22 @@ bool update(float dt){
 	return false;
 }
 
-void finish()
-{
+void finish() {
+
 }
 
 mixin runGame!(ready, update, finish);
 
 // Helper function
-ref clampindex(T, I)(T[] a, ref I i)
-{
-    if (i < 0 || i == I.max)
-    {
-        i = 0;
-    }
-    if (i >= a.length)
-    {
-        i = cast(I) a.length - 1;
-    }
-    return a[i];
+ref clampindex(T, I)(T[] a, ref I i) {
+
+if (i < 0 || i == I.max) {
+
+		i = 0;
+	}
+if (i >= a.length) {
+
+		i = cast(I) a.length - 1;
+	}
+	return a[i];
 }

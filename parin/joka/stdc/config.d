@@ -10,17 +10,17 @@ module parin.joka.stdc.config;
 extern(C) nothrow @nogc:
 
 version (WebAssembly) {
-    static if ((void*).sizeof > int.sizeof) {
-        alias CLong = long;
-        alias CULong = ulong;
-    } else {
-        alias CLong = int;
-        alias CULong = uint;
-    }
+	static if ((void*).sizeof > int.sizeof) {
+		alias CLong = long;
+		alias CULong = ulong;
+	} else {
+		alias CLong = int;
+		alias CULong = uint;
+	}
 } else version (Windows) {
-    alias CLong = int;
-    alias CULong = uint;
+	alias CLong = int;
+	alias CULong = uint;
 } else {
-    alias CLong = long;
-    alias CULong = ulong;
+	alias CLong = long;
+	alias CULong = ulong;
 }

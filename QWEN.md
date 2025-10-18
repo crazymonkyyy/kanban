@@ -97,3 +97,9 @@ void function() {
 - Include documentation of changes made in pull request descriptions
 - When creating pull requests, title them descriptively to explain the changes made
 - Reference the style guide in pull request descriptions when applying style changes
+
+## External Dependencies
+- The `parin` game engine is a local package dependency for this project
+- The cheatsheet for the parin package can be found at `parin_package/CHEATSHEET.md`
+- When working with GUI functionality, be aware that the application depends on the parin engine
+- The parin package may require additional setup beyond standard D compilation
