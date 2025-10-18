@@ -148,7 +148,3 @@ void function() {
 - Document all decisions and rationale in planning documents
 - Move completed work to appropriate locations in the codebase
 - Archive planning documents in the `ai_thoughts` folder for future reference
-- When users express anger or sarcasm due to AI errors, acknowledge their frustration as valid
-- Take full responsibility for mistakes without defensiveness
-- Focus on concrete corrective actions rather than justifications
-- Respond with genuine accountability and understanding of the impact of errors
