@@ -71,25 +71,22 @@ string findfont(string font=""){
 			s=s[1..$];
 		}
 		if (s.length >= magicstring.length && s[0 .. magicstring.length] == magicstring){
-if (verbose) {
-
+			if (verbose) {
 				writeln("google says:", s);
 			}
 			s = s[magicstring.length .. $];
 			s = s[0 .. s.countUntil(')')];
-if (verbose) {
-
+			if (verbose) {
 				writeln("trimed as:", s);
 			}
-if (verbose) {
-
+			if (verbose) {
 				writeln("attempting download to:", file);
 			}
 			//NOTE: curl is not always seccessful at creating the file if the folder doesnt exist
-			exe("curl \"" ~ s ~ "\" --output " ~ file ~ "").writeln;
+			exe("curl \"" ~ s ~ "\" --output " ~ file ~ "\"").writeln;
 			return file;
 		}
-}
+	}
 	static bool runonce=true;
 	assert(runonce, "ran twice meaning something is very wrong");
 	runonce=false;

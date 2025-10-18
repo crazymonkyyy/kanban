@@ -103,3 +103,10 @@ void function() {
 - The cheatsheet for the parin package can be found at `parin_package/CHEATSHEET.md`
 - When working with GUI functionality, be aware that the application depends on the parin engine
 - The parin package may require additional setup beyond standard D compilation
+
+## Compilation and Testing
+- Always run the compiler to verify changes work correctly: `dmd -c <filename.d>`
+- When making changes to formatting or structure, test compilation before and after
+- Especially when explicitly asked to test, always verify with the actual compiler
+- Use `dmd -c` for quick compilation checks without linking
+- For full functionality tests, run with appropriate parameters including dependencies

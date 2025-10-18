@@ -75,8 +75,7 @@ void drawitem(int i,string s,bool crossed,Rect r, int colorindex){
 }
 
 // Mathematical background pattern functions
-void drawMathBackground() {
-
+void drawMathBackground(){
 	// Base background
 	drawRect(Rect(0, 0, 2000, 2000), palette[0]); // base00 - dark background
 
@@ -90,15 +89,13 @@ void drawMathBackground() {
 	drawSineWavePattern();
 }
 
-void drawFibonacciSpiral() {
-
+void drawFibonacciSpiral(){
 	import std.math : PI, sin, cos;
 
 	Vec2 center = Vec2(400, 300);
 	float phi = 1.618033988749; // golden ratio
 
-for (int i = 0; i < 100; i++) {
-
+	for (int i = 0; i < 100; i++){
 		float angle = i * 0.1;
 		float radius = i * phi * 2;
 		Vec2 pos = Vec2(
@@ -106,8 +103,7 @@ for (int i = 0; i < 100; i++) {
 			center.y + sin(angle) * radius
 		);
 
-if (pos.x > 0 && pos.x < 1800 && pos.y > 0 && pos.y < 1800) {
-
+		if (pos.x > 0 && pos.x < 1800 && pos.y > 0 && pos.y < 1800){
 			int colorIdx = (i / 10) % 4;
 			Color spiralColor = palette[colorIdx + 1];
 			spiralColor.a = 30; // very transparent
@@ -116,34 +112,29 @@ if (pos.x > 0 && pos.x < 1800 && pos.y > 0 && pos.y < 1800) {
 	}
 }
 
-void drawGoldenGrid() {
-
+void drawGoldenGrid(){
 	float phi = 1.618033988749; // golden ratio
 	int spacing = cast(int)(50 * phi);
 
 	// Vertical lines
-for (int x = 0; x < 2000; x += spacing) {
-
+	for (int x = 0; x < 2000; x += spacing){
 		Color gridColor = palette[2];
 		gridColor.a = 15; // very transparent
 		drawRect(Rect(x, 0, 1, 2000), gridColor);
 	}
 
 	// Horizontal lines
-for (int y = 0; y < 2000; y += spacing) {
-
+	for (int y = 0; y < 2000; y += spacing){
 		Color gridColor = palette[2];
 		gridColor.a = 15; // very transparent
 		drawRect(Rect(0, y, 2000, 1), gridColor);
 	}
 }
 
-void drawSineWavePattern() {
-
+void drawSineWavePattern(){
 	import std.math : PI, sin;
 
-for (int x = 0; x < 2000; x += 10) {
-
+	for (int x = 0; x < 2000; x += 10){
 		float wave1 = sin(x * 0.01) * 50 + 200;
 		float wave2 = sin(x * 0.007 + PI / 3) * 30 + 400;
 		float wave3 = sin(x * 0.013 + PI) * 40 + 600;
@@ -162,17 +153,14 @@ for (int x = 0; x < 2000; x += 10) {
 }
 
 // Positive modulo function - always returns 0 <= result < divisor
-int mod(int dividend, int divisor) {
-
+int mod(int dividend, int divisor){
 	int result = dividend % divisor;
 	return result < 0 ? result + divisor : result;
 }
 
-unittest {
-
+unittest{
 	// Test mod function for range -100 to 100
-foreach (i; -100 .. 101) {
-
+	foreach (i; -100 .. 101){
 		int result8 = mod(i, 8);
 		int result16 = mod(i, 16);
 
@@ -181,29 +169,24 @@ foreach (i; -100 .. 101) {
 		assert(result16 >= 0 && result16 < 16, "mod(16) out of bounds");
 
 		// Test specific known values
-if (i == -1) {
-
+		if (i == -1){
 			assert(result8 == 7, "mod(-1, 8) should be 7");
 			assert(result16 == 15, "mod(-1, 16) should be 15");
 		}
-if (i == -8) {
-
+		if (i == -8){
 			assert(result8 == 0, "mod(-8, 8) should be 0");
 		}
-if (i == -16) {
-
+		if (i == -16){
 			assert(result16 == 0, "mod(-16, 16) should be 0");
 		}
-if (i == 0) {
-
+		if (i == 0){
 			assert(result8 == 0, "mod(0, 8) should be 0");
 			assert(result16 == 0, "mod(0, 16) should be 0");
 		}
 	}
 }
 
-Color getMathBackgroundColor(int x, int y, int colorindex) {
-
+Color getMathBackgroundColor(int x, int y, int colorindex){
 	// Use prime number pattern for background selection
 	int[] primes = [2, 3, 5, 7, 11, 13, 17, 19];
 	int hash = (x * primes[mod(colorindex, 8)] + y * primes[mod(colorindex + 1, 8)]) % 256;
