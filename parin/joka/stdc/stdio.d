@@ -23,90 +23,90 @@ enum STDERR_FILENO = 2;
 
 // NOTE: Code from the D standard library.
 version (CRuntime_Microsoft) {
-    FILE* __acrt_iob_func(int hnd);     // VS2015+, reimplemented in msvc.d for VS2013-
-    FILE* stdin()() { return __acrt_iob_func(0); }
-    FILE* stdout()() { return __acrt_iob_func(1); }
-    FILE* stderr()() { return __acrt_iob_func(2); }
+	FILE* __acrt_iob_func(int hnd);     // VS2015+, reimplemented in msvc.d for VS2013-
+	FILE* stdin()() { return __acrt_iob_func(0); }
+	FILE* stdout()() { return __acrt_iob_func(1); }
+	FILE* stderr()() { return __acrt_iob_func(2); }
 } else version (CRuntime_Glibc) {
-    extern __gshared FILE* stdin;
-    extern __gshared FILE* stdout;
-    extern __gshared FILE* stderr;
+	extern __gshared FILE* stdin;
+	extern __gshared FILE* stdout;
+	extern __gshared FILE* stderr;
 } else version (Darwin) {
-    extern __gshared FILE* __stdinp;
-    extern __gshared FILE* __stdoutp;
-    extern __gshared FILE* __stderrp;
-    alias __stdinp  stdin;
-    alias __stdoutp stdout;
-    alias __stderrp stderr;
+	extern __gshared FILE* __stdinp;
+	extern __gshared FILE* __stdoutp;
+	extern __gshared FILE* __stderrp;
+	alias __stdinp  stdin;
+	alias __stdoutp stdout;
+	alias __stderrp stderr;
 } else version (FreeBSD) {
-    extern __gshared FILE* __stdinp;
-    extern __gshared FILE* __stdoutp;
-    extern __gshared FILE* __stderrp;
-    alias __stdinp  stdin;
-    alias __stdoutp stdout;
-    alias __stderrp stderr;
+	extern __gshared FILE* __stdinp;
+	extern __gshared FILE* __stdoutp;
+	extern __gshared FILE* __stderrp;
+	alias __stdinp  stdin;
+	alias __stdoutp stdout;
+	alias __stderrp stderr;
 } else version (NetBSD) {
-    extern __gshared FILE[3] __sF;
-    auto __stdin()() { return &__sF[0]; }
-    auto __stdout()() { return &__sF[1]; }
-    auto __stderr()() { return &__sF[2]; }
-    alias __stdin stdin;
-    alias __stdout stdout;
-    alias __stderr stderr;
+	extern __gshared FILE[3] __sF;
+	auto __stdin()() { return &__sF[0]; }
+	auto __stdout()() { return &__sF[1]; }
+	auto __stderr()() { return &__sF[2]; }
+	alias __stdin stdin;
+	alias __stdout stdout;
+	alias __stderr stderr;
 } else version (OpenBSD) {
-    extern __gshared FILE[3] __sF;
-    auto __stdin()() { return &__sF[0]; }
-    auto __stdout()() { return &__sF[1]; }
-    auto __stderr()() { return &__sF[2]; }
-    alias __stdin stdin;
-    alias __stdout stdout;
-    alias __stderr stderr;
+	extern __gshared FILE[3] __sF;
+	auto __stdin()() { return &__sF[0]; }
+	auto __stdout()() { return &__sF[1]; }
+	auto __stderr()() { return &__sF[2]; }
+	alias __stdin stdin;
+	alias __stdout stdout;
+	alias __stderr stderr;
 } else version (DragonFlyBSD) {
-    extern __gshared FILE* __stdinp;
-    extern __gshared FILE* __stdoutp;
-    extern __gshared FILE* __stderrp;
-    alias __stdinp  stdin;
-    alias __stdoutp stdout;
-    alias __stderrp stderr;
+	extern __gshared FILE* __stdinp;
+	extern __gshared FILE* __stdoutp;
+	extern __gshared FILE* __stderrp;
+	alias __stdinp  stdin;
+	alias __stdoutp stdout;
+	alias __stderrp stderr;
 } else version (Solaris) {
-    extern __gshared FILE[_NFILE] __iob;
-    auto stdin()() { return &__iob[0]; }
-    auto stdout()() { return &__iob[1]; }
-    auto stderr()() { return &__iob[2]; }
+	extern __gshared FILE[_NFILE] __iob;
+	auto stdin()() { return &__iob[0]; }
+	auto stdout()() { return &__iob[1]; }
+	auto stderr()() { return &__iob[2]; }
 } else version (CRuntime_Bionic) {
-    extern __gshared FILE[3] __sF;
-    auto stdin()() { return &__sF[0]; }
-    auto stdout()() { return &__sF[1]; }
-    auto stderr()() { return &__sF[2]; }
+	extern __gshared FILE[3] __sF;
+	auto stdin()() { return &__sF[0]; }
+	auto stdout()() { return &__sF[1]; }
+	auto stderr()() { return &__sF[2]; }
 } else version (CRuntime_Musl) {
-    extern __gshared FILE* stdin;
-    extern __gshared FILE* stdout;
-    extern __gshared FILE* stderr;
+	extern __gshared FILE* stdin;
+	extern __gshared FILE* stdout;
+	extern __gshared FILE* stderr;
 } else version (CRuntime_Newlib) {
-    __gshared struct _reent {
-        int _errno;
-        __sFILE* _stdin;
-        __sFILE* _stdout;
-        __sFILE* _stderr;
-    }
-    _reent* __getreent();
-    pragma(inline, true) {
-        auto stdin()() { return __getreent()._stdin; }
-        auto stdout()() { return __getreent()._stdout; }
-        auto stderr()() { return __getreent()._stderr; }
-    }
+	__gshared struct _reent {
+		int _errno;
+		__sFILE* _stdin;
+		__sFILE* _stdout;
+		__sFILE* _stderr;
+	}
+	_reent* __getreent();
+	pragma(inline, true) {
+		auto stdin()() { return __getreent()._stdin; }
+		auto stdout()() { return __getreent()._stdout; }
+		auto stderr()() { return __getreent()._stderr; }
+	}
 } else version (CRuntime_UClibc) {
-    extern __gshared FILE* stdin;
-    extern __gshared FILE* stdout;
-    extern __gshared FILE* stderr;
+	extern __gshared FILE* stdin;
+	extern __gshared FILE* stdout;
+	extern __gshared FILE* stderr;
 } else version (WASI) {
-    extern __gshared FILE* stdin;
-    extern __gshared FILE* stdout;
-    extern __gshared FILE* stderr;
+	extern __gshared FILE* stdin;
+	extern __gshared FILE* stdout;
+	extern __gshared FILE* stderr;
 } else {
-    extern __gshared FILE* stdin;
-    extern __gshared FILE* stdout;
-    extern __gshared FILE* stderr;
+	extern __gshared FILE* stdin;
+	extern __gshared FILE* stdout;
+	extern __gshared FILE* stderr;
 }
 
 FILE* fopen(const(char)* filename, const(char)* mode);

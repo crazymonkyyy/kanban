@@ -3,16 +3,15 @@
 # Usage script for kanban tools
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-KANBAN_DIR="$(dirname "$SCRIPT_DIR")"
 
 echo "Kanban Tools"
 echo "============"
 
 if [ $# -eq 0 ]; then
     echo "Available tools:"
-    echo "  randomtoggle <file.kantban> - Randomly toggle completion status of items"
-    echo "  validate <file.kantban>     - Validate kanban file format and structure"
-    echo "  corrupt <file> [rate] [out] - Randomly corrupt text file with ASCII chars"
+    echo "  randomtoggle <file.kantban>    - Randomly toggle completion status of items"
+    echo "  validate <file.kantban>        - Validate kanban file format and structure"
+    echo "  corrupt <file> [rate] [out]    - Randomly corrupt text file with ASCII chars"
     echo ""
     echo "Usage:"
     echo "  ./run.sh randomtoggle TODO.kantban"
@@ -28,15 +27,15 @@ shift
 case "$TOOL" in
     "randomtoggle")
         echo "Running randomtoggle tool..."
-        cd "$KANBAN_DIR" && dmd -i -run "tools/randomtoggle.d" "$@"
+        dmd -i -run "tools/randomtoggle.d" "$@"
         ;;
     "validate")
         echo "Running validate tool..."
-        cd "$KANBAN_DIR" && dmd -i -run "tools/validate.d" "$@"
+        dmd -i -run "tools/validate.d" "$@"
         ;;
     "corrupt")
         echo "Running corrupt tool..."
-        cd "$KANBAN_DIR" && dmd -i -run "tools/corrupt.d" "$@"
+        dmd -i -run "tools/corrupt.d" "$@"
         ;;
     *)
         echo "Unknown tool: $TOOL"
