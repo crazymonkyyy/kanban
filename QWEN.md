@@ -1,152 +1,235 @@
-# D Language Style Guide for Kanban Project (Original Human Format)
+# Qwen Code Context for Kanban Project
 
-This style guide documents the original whitespace and formatting conventions used in this project, based on analysis of the git history before AI formatting changes.
+## Project Overview
 
-## Indentation
-- Use tabs for indentation (not spaces)
-- Each level of nesting uses one additional tab
+This is a Kanban board application written in the D programming language. The application uses a custom text-based file format with a `.kantban` extension to store kanban board data. The project aims to be a "deeply nested, unix-porn friendly, with a dumb file format todo list."
 
-## Braces and Curly Brackets
-- Opening brace `{` goes on the same line as the function/conditional declaration
-- Closing brace `}` goes on its own line at the same indentation level
-- Example:
-```d
-void function() {
-	tabs here
-}
+### Key Features
+- Terminal-based Kanban board viewer and editor
+- Custom `.kantban` file format for storing board data
+- Arrow key navigation through columns and items
+- Visual rendering using the Parin game engine
+- Support for checked/unchecked items
+
+### Project Structure
+```
+├── app.d              # Main application entry point
+├── format.d           # File format parsing and serialization
+├── configs.d          # Configuration and font handling
+├── drawing.d          # Visual rendering functions
+├── tools/             # Utility tools for working with .kantban files
+├── syntaxtest/        # Syntax test files for validating concepts
+├── docs/              # Documentation files
+├── ai_thoughts/       # AI planning and workflow documentation
+└── parin_package/     # Local Parin game engine dependency
 ```
 
-## Spacing Around Operators
-- Minimal spacing around operators: no spaces around `=`, `+`, `-`, `*`, `/`, `==`, etc.
-- No space after commas in function calls and parameter lists
-- Example: `x=y+z;` instead of `x = y + z;`
+## Main Application Components
 
-## Spacing Around Keywords
-- No extra space after keywords like `if`, `for`, `foreach`, `while`, `switch`, etc.
-- Example: `if(condition)` instead of `if (condition)`
+### app.d - Main Application
+The main entry point that sets up the Kanban board viewer using the Parin game engine. It handles:
+- Command-line argument parsing for specifying the .kantban file to open
+- Keyboard navigation (arrow keys) for moving between columns and items
+- Rendering the Kanban board using functions from the drawing module
+- Managing the application state (current column `y` and item positions `x[]`)
 
-## Enum Formatting
-- No spaces around the `=` in enum declarations
-- Example: `enum name=value;` instead of `enum name = value;`
+### format.d - File Format Handling
+Handles parsing and serialization of the custom `.kantban` file format:
+- `todolist` struct: Represents a card with title, items, and crossed (checked) status
+- `openkantban()`: Parses a .kantban file into a `todolist[][]` data structure
+- `savekantban()`: Serializes a `todolist[][]` structure back to a .kantban file
 
-## Function Declarations
-- No spaces around parameter commas
-- No space after the return type and before the function name
-- Example: `int function(int x,int y)`
+The file format uses a hierarchical structure:
+```
+# Column
+## Card Title
+- [ ] Unchecked item
+- [x] Checked item
+```
 
-## Arrow Functions
-- No spaces around the arrow operator `=>`
-- Example: `auto func(int x)=>x*2;`
+### configs.d - Configuration System
+Manages application configuration including:
+- Font configuration (title and text fonts)
+- Color scheme management using Solarized-Dark palette
+- Font loading and downloading from Google Fonts
+- Path resolution for font files
 
-## Line Breaks
-- Keep related code on the same line when possible
-- Break lines only when necessary for readability
+### drawing.d - Visual Rendering
+Implements the visual rendering of the Kanban board using the Parin game engine:
+- Initializes fonts and color palettes
+- Draws cards with mathematical background patterns
+- Handles visual positioning and layout
+- Implements item rendering with strikethrough for checked items
 
-## Comments
-- Single-line comments with `//` have no space after the slashes
-- Multi-line comments are formatted minimally
-- Comments are placed inline or on separate lines as needed
+## Key Technologies
 
-## Imports
-- One import statement per line
-- No blank line required after import section
+### D Programming Language
+The application is written in D, a systems programming language with C-like syntax. Key D features used:
+- Garbage collection for memory management
+- Templates for generic programming
+- Uniform Function Call Syntax (UFCS)
+- Built-in unit testing capabilities
+- Rich standard library (std.*) modules
 
-## Array and Range Operations
-- No spaces around range operators `..`
-- Example: `array[0..length]` instead of `array[0 .. length]`
+### Parin Game Engine
+A local package dependency that provides:
+- Cross-platform windowing and rendering
+- Input handling (keyboard, mouse)
+- Audio playback
+- Asset management
+- Game loop infrastructure
 
-## Conditional and Loop Statements
-- No space between the keyword and the opening parenthesis
-- No space after semicolons in for loops: `for(int i=0;i<10;i++)`
+The engine uses a mixin-based approach for setting up the main application loop.
 
-## Function Calls
-- No space after commas in function arguments
-- Example: `function(arg1,arg2,arg3)` instead of `function(arg1, arg2, arg3)`
+## Building and Running
 
-## Overall Style
+### Prerequisites
+- D compiler (dmd recommended)
+- Parin game engine dependencies
+- Internet connection for font downloading (optional)
+
+### Running the Application
+```bash
+# Run the main application
+./app.d [filename.kantban]
+
+# Run with a specific file
+./app.d TODO.kantban
+```
+
+### Compiling Individual Files
+```bash
+# Quick compilation check
+dmd -c filename.d
+
+# Compile and run
+dmd -run filename.d
+```
+
+### Using Tools
+The tools directory contains utility programs:
+```bash
+# Run a tool
+./tools/toolname.d [arguments]
+```
+
+## Development Workflow
+
+### Code Style
+Follows a minimal spacing style guide:
+- Tabs for indentation (not spaces)
+- Minimal spacing around operators (`x=y+z;` not `x = y + z;`)
+- No spaces after keywords (`if(condition)` not `if (condition)`)
 - Compact formatting with minimal whitespace
-- Consistent use of tabs for indentation
-- Less verbose spacing compared to AI-generated formatting
-- More concise and dense code layout
 
-## Git Commit Style
-- When committing changes made by AI tools, use "qwen ai" as the commit author
-- Keep track of instructions and document them in the style guide
-- Use descriptive commit messages that explain the purpose of the changes
+### AI Development Process
+The project uses a structured AI development workflow documented in `ai_thoughts/`:
+1. Planning Phase - Requirement analysis and design documentation
+2. Implementation Phase - Coding with incremental verification
+3. Review Phase - Self-review and documentation updates
+4. Pull Request Phase - PR preparation and submission
+5. Clean Up Phase - Post-merge cleanup and knowledge transfer
 
-## Single Source of Truth Principle
-- Avoid duplicating struct definitions across files (e.g., the `todolist` struct should be defined once in format.d and imported where needed)
-- Reuse existing functions from format.d rather than reimplementing parsing and saving logic in tools
-- Import and use existing functionality instead of creating duplicate implementations
-- Maintain one canonical implementation of core data structures and operations
+### Testing
+- Unit tests integrated throughout the codebase
+- Syntax tests in `syntaxtest/` directory for validating concepts
+- Manual testing through direct execution of .d files
 
-## Error Handling Philosophy
-- Use minimal error handling approach similar to the original application
-- Prefer simple assertions for critical failures rather than extensive validation
-- Let errors propagate naturally rather than implementing comprehensive error reporting systems
-- Avoid creating complex error categorization systems (ValidationResult classes, etc.)
-- Focus on core functionality rather than extensive error checking and reporting
-- Maintain consistency with the minimalistic error handling approach of the original code
-- Implement fallback strategies instead of complex error reporting (e.g., try alternative approaches rather than detailed error messages)
-- Follow the style demonstrated in the findfont function as a model for error handling approach
+## File Format Specification
 
-## Git and Pull Request Style
-- When making changes to align with the style guide, commit changes with descriptive messages
-- Use "qwen ai" as the commit author when making AI-assisted changes
-- Test all tools and functionality before creating pull requests
-- Include documentation of changes made in pull request descriptions
-- When creating pull requests, title them descriptively to explain the changes made
-- Reference the style guide in pull request descriptions when applying style changes
+### Structure
+The .kantban format uses a simple hierarchical structure:
+- Columns start with `# `
+- Cards start with `## `
+- Items start with `- `
+- Checkboxes can be `[ ]` (unchecked) or `[x]` (checked)
 
-## External Dependencies
-- The `parin` game engine is a local package dependency for this project
-- The cheatsheet for the parin package can be found at `parin_package/CHEATSHEET.md`
-- When working with GUI functionality, be aware that the application depends on the parin engine
-- The parin package may require additional setup beyond standard D compilation
+### Example
+```
+# To Do
+## Research
+- [ ] Investigate new libraries
+- [x] Read documentation
+## Implementation
+- [ ] Set up project structure
+- [x] Create basic components
 
-## Compilation and Testing
-- Always run the compiler to verify changes work correctly: `dmd -c <filename.d>`
-- When making changes to formatting or structure, test compilation before and after
-- Especially when explicitly asked to test, always verify with the actual compiler
-- Use `dmd -c` for quick compilation checks without linking
-- For full functionality tests, run with appropriate parameters including dependencies
-- Syntax tests belong in the `syntaxtest/` directory and should validate specific behaviors
-- Test programs for theoretical concepts should be placed in `syntaxtest/` to validate assumptions
+# Done
+## Completed
+- [x] Project setup
+- [x] Initial commit
+```
 
-## AI Development Guidelines
-- When explicitly instructed to test, verify actual functionality rather than assuming success
-- Always verify that source files execute as expected, especially when they have shebangs allowing direct execution
-- Do not make assumptions about file execution mechanisms without verification
-- Understand the difference between source code and compiled binaries
-- When creating tools that modify code, test thoroughly on sample files before applying to production code
-- Respect original formatting styles completely - "minimal spacing" means no spaces around operators
-- Verify all claims about functionality before stating them as facts
-- Use incremental changes with verification at each step when modifying code
-- When fixing broken tools or code, ensure complete understanding of the original requirements
-- Avoid defensive responses when errors are identified; instead, immediately work on correcting them
-- Recognize when assumptions about file behavior or system responses are incorrect
-- Test the actual execution model of files before making claims about executability
-- Validate automated tools against known good examples before applying broadly
-- Perform thorough error analysis - don't just fix surface symptoms but understand root causes
-- Understand data flow between functions and how different variables interact
-- Don't assume correct initial states - consider all boundary conditions
-- Test boundary conditions thoroughly, especially for array access and index calculations
-- Trace execution flow to understand when and why errors occur
-- Prioritize correctness over cleverness - simple, working solutions are better than complex ones that fail
-- When implementing new features, first understand the existing codebase architecture and integration points
-- Research existing documentation and examples before proposing implementation approaches
-- Create detailed implementation plans that consider technical constraints and integration requirements
-- Propose implementation approaches that align with existing code patterns and conventions
-- When adding command-line flags or modes, follow existing patterns in the codebase
-- Consider both functional and user experience aspects when designing new features
-- When disagreeing with factual claims, always run code to validate rather than arguing without evidence
-- Delete emotional validation content and focus on technical accuracy
+## Configuration System
 
-## Workflow Process
-- All AI development work should follow a structured workflow with clear phases
-- Create detailed implementation plans before beginning any coding work
-- Store all planning documents and reflections in the `ai_thoughts` folder
-- Follow a feedback loop process: action plans → implementation → PR → review → clean up passes
-- Document all decisions and rationale in planning documents
-- Move completed work to appropriate locations in the codebase
-- Archive planning documents in the `ai_thoughts` folder for future reference
+### Fonts
+- Default fonts: Noto Sans
+- Automatic font downloading from Google Fonts
+- Local font storage in `~/.local/share/fonts/`
+
+### Colors
+- Solarized-Dark color scheme by default
+- 16-color palette system
+- Mathematical background patterns for visual appeal
+
+## Tools and Utilities
+
+### Available Tools
+- `corrupt.d` - Randomly corrupts text files for testing
+- `randomtoggle.d` - Randomly toggles completion status of items
+- `validate.d` - Validates kanban file format and structure
+- `fix_formatting.d` - Fixes whitespace formatting according to style guide
+
+### Usage
+Tools can be run directly:
+```bash
+./tools/randomtoggle.d file.kantban
+./tools/validate.d file.kantban
+./tools/corrupt.d file.txt 10 corrupted.txt
+```
+
+## Development Resources
+
+### Documentation
+- `docs/file_format.md` - Complete specification of .kantban file format
+- `docs/configuration.md` - Documentation of configuration system
+- `parin_package/CHEATSHEET.md` - Parin engine reference
+- `ai_thoughts/` - AI planning documents and workflow documentation
+
+### Testing and Validation
+- Syntax tests in `syntaxtest/` directory
+- Unit tests integrated throughout the codebase
+- Manual testing through direct execution
+
+## Common Development Tasks
+
+### Adding a New Feature
+1. Create a planning document in `ai_thoughts/`
+2. Follow the standardized workflow process
+3. Implement with incremental verification
+4. Document the feature in appropriate documentation files
+5. Archive planning documents in `ai_thoughts/`
+
+### Fixing Formatting Issues
+1. Use the `fix_formatting.d` tool for automatic fixes
+2. Follow the style guide for manual adjustments
+3. Verify with `dmd -c` compilation checks
+
+### Adding New Tools
+1. Create new .d files in the `tools/` directory
+2. Follow the shebang pattern for direct execution
+3. Use existing functions from format.d for file operations
+4. Add usage instructions and examples
+
+## Troubleshooting
+
+### Common Issues
+1. **Font Loading Failures**: Check internet connection and font paths
+2. **Compilation Errors**: Verify D compiler installation and dependencies
+3. **Runtime Errors**: Check file permissions and format validity
+
+### Debugging Tips
+1. Use `dmd -c` for quick compilation checks
+2. Run tools with sample files to isolate issues
+3. Check parin engine documentation for rendering problems
+4. Use syntax tests to validate assumptions about behavior
