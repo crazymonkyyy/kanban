@@ -1,6 +1,9 @@
 import format;
 import parin;
 import configs;
+import rl = parin.bindings.rl;
+import bk = parin.backend;
+
 FontId textfont;
 FontId titlefont;
 //static this(){
@@ -10,7 +13,7 @@ void initdrawing(){
 	assert(textfont.isValid);
 	titlefont=loadFont(titlefontpath(),textsize+textsize/3);
 	assert(titlefont.isValid);
-	initpalette;
+	initpalette();
 }
 //NOTE: The original had a different colorindex function without the mod function and different logic
 //NOTE: The original had a simpler colorindex function: int colorindex(int x,int y)=>x+y*2;
@@ -18,7 +21,9 @@ int colorindex(int x,int y)=>x+y*2;
 //NOTE: The original had different draw function without the mathematical background and different parameters
 //NOTE: The original draw function was much simpler and didn't have colorindex parameter
 void draw(todolist[][] data,int[] xs,int ys){
-	//data[0][0].draw(Vec2(300,300));
+	// Draw mathematical pattern background
+	drawMathBackground();
+
 	auto r=estimate(data[0][0]);
 	foreach(int y,list;data){
 	foreach(int x,e;list){
@@ -31,27 +36,42 @@ void draw(todolist data, Vec2 where, int colorindex){
 	data.sanitize;
 	auto e=estimate(data);
 	auto r=Rect(where.x,where.y,e.x,e.y);
-	drawrounded(r,red,cyan);
-	data.title.drawtitle(r);
+	// Use mathematical background pattern for each card
+	Color cardBg = getMathBackgroundColor(cast(int) where.x, cast(int) where.y, colorindex);
+	drawrounded(r, palette[mod(colorindex, 8) + 8], cardBg);
+	data.title.drawtitle(r, colorindex);
 	import std;
+
 	foreach(i;0..cast(int)data.items.length){
-		drawitem(i,data.items[i],data.crossed[i],r);
+		drawitem(i,data.items[i],data.crossed[i],r, colorindex);
 	}
 }
 enum roundness=90.0;
 //enum background=cyan;
-void drawrounded(Rect r, Color c1,Color c2){
+void drawrounded(Rect r, Color outline, Color background){
 	float round=roundness/min(r.size.x,r.size.y);
-	rl.DrawRectangleRounded(bk.toRl(r),round,9,bk.toRl(c2));
-	rl.DrawRectangleRoundedLinesEx(bk.toRl(r),round,9, 10,bk.toRl(c1));
+	// Draw subtle background
+	rl.DrawRectangleRounded(bk.toRl(r),round,9,bk.toRl(background));
+	// Draw colored outline
+	rl.DrawRectangleRoundedLinesEx(bk.toRl(r),round,9, 10,bk.toRl(outline));
 }
-void drawtitle(string s,Rect r){
+void drawtitle(string s,Rect r, int colorindex){
 	//drawRect(Rect(r.x+15,r.y+15,300,30));
-	drawText(titlefont,s,Vec2(r.x+15,r.y+15));//,palette[7]);
+	drawText(titlefont,s,Vec2(r.x+15,r.y+15), DrawOptions(color : palette[15])); // base0F - bright white
 }
-void drawitem(int i,string s,bool crossed,Rect r){
+void drawitem(int i,string s,bool crossed,Rect r, int colorindex){
 	Vec2 where=Vec2(r.x+20,r.y+i*25+40);
+	Color textcolor = crossed ? palette[3] : palette[4]; // base03 for crossed (dark gray), base04 for normal (light gray)
 	drawText(textfont,s,where);
+
+	// Draw strikethrough line for crossed items
+	if(crossed){
+		Vec2 textSize = measureTextSize(textfont, s);
+		float lineY = where.y + textSize.y * 0.5; // Middle of text height
+		Color lineColor = palette[3];
+		lineColor.a = 180; // Semi-transparent
+		drawRect(Rect(where.x, lineY, textSize.x, 2), lineColor);
+	}
 }
 
 // Mathematical background pattern functions

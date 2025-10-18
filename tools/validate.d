@@ -1,17 +1,6 @@
 #!/usr/bin/env -S dmd -i -run
 import std;
-
-// Copy the todolist struct from format.d to avoid import issues
-struct todolist{
-	string title;
-	string[] items;
-	bool[] crossed;
-	void sanitize(){
-		if(crossed.length<items.length){
-			crossed.length=items.length;
-		}
-	}
-}
+import format;  // Import from format.d to follow single source of truth principle
 
 void main(string[] args){
 	if(args.length!=2){
@@ -32,11 +21,8 @@ void main(string[] args){
 		return;
 	}
 
-	// Try to parse the file
-	todolist[][] data;
-	if(exists(filename)){
-		data=openkantban(filename);
-	}
+	// Try to parse the file using the function from format.d
+	todolist[][] data=openkantban(filename);
 
 	// Simple validation - just check if we could parse it
 	if(data.length==0){
@@ -64,56 +50,4 @@ void main(string[] args){
 
 	writeln();
 	writeln("File is valid! ✓");
-}
-
-todolist[][] openkantban(string where){
-	if(!exists(where))
-		return [];
-	todolist[][] result;
-	todolist[] col;
-	todolist cur;
-	foreach(line;File(where).byLineCopy){
-		if(line.startsWith("# ")){
-			if(cur.title.length)
-				col~=cur;
-			if(col.length)
-				result~=col;
-			col=[];
-			cur=todolist();
-		}
-		else if(line.startsWith("## ")){
-			if(cur.title.length)
-				col~=cur;
-			cur=todolist(line[3..$].idup);
-		}
-		else if(line.startsWith("- ")){
-			bool done=false;
-			string item;
-
-			// Check for various checkbox formats
-			if(line.length>=6&&line[2]=='['&&line[4]==']'){
-				// Format: "- [x]" or "- [ ]"
-				done=(line[3]=='x'||line[3]=='X');
-				item=line.length>6?line[6..$].strip.idup:"";
-			}
-			else if(line.length>=7&&line[2]=='['&&line[5]==']'){
-				// Format: "- [x ]" or "- [ x]\" - flexible spacing
-				done=(line[3]=='x'||line[3]=='X'||line[4]=='x'||line[4]=='X');
-				item=line.length>7?line[7..$].strip.idup:"";
-			}
-			else{
-				// Plain format: "- item"
-				item=line.length>2?line[2..$].strip.idup:"";
-				done=false;
-			}
-
-			cur.items~=item;
-			cur.crossed~=done;
-		}
-	}
-	if(cur.title.length)
-		col~=cur;
-	if(col.length)
-		result~=col;
-	return result;
 }

@@ -1,7 +1,7 @@
 // ##config strings
 enum titlefontname="Noto Sans";
 enum textfontname="Noto Sans";
-enum textsize=18;
+enum textsize=22;
 enum colorschemename="Solarized-Dark";
 enum layout="Justified";
 enum boxstyle="Rounded-30";

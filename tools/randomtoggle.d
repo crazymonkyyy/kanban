@@ -1,17 +1,6 @@
 #!/usr/bin/env -S dmd -i -run
 import std;
-
-// Copy the todolist struct from format.d to avoid import issues
-struct todolist{
-	string title;
-	string[] items;
-	bool[] crossed;
-	void sanitize(){
-		if(crossed.length<items.length){
-			crossed.length=items.length;
-		}
-	}
-}
+import format;  // Import from format.d to follow single source of truth principle
 
 void main(string[] args){
 	if(args.length!=2){
@@ -29,11 +18,8 @@ void main(string[] args){
 		writeln("Warning: File doesn't have .kantban extension");
 	}
 
-	// Load the kanban data
-	todolist[][] data;
-	if(exists(filename)){
-		data=openkantban(filename);
-	}
+	// Load the kanban data using the function from format.d
+	todolist[][] data=openkantban(filename);
 	
 	if(data.length==0){
 		writeln("No data found in file");
@@ -72,57 +58,7 @@ void main(string[] args){
 
 	writeln("\nToggled ",toggledItems," out of ",totalItems," items");
 
-	// Save back to file
+	// Save back to file using the function from format.d
 	savekantban(data,filename);
 	writeln("Saved changes to ",filename);
-}
-
-todolist[][] openkantban(string where){
-	if(!exists(where))
-		return [];
-	todolist[][] result;
-	todolist[] col;
-	todolist cur;
-	foreach(line;File(where).byLineCopy){
-		if(line.startsWith("# ")){
-			if(cur.title.length)
-				col~=cur;
-			if(col.length)
-				result~=col;
-			col=[];
-			cur=todolist();
-		}
-		else if(line.startsWith("## ")){
-			if(cur.title.length)
-				col~=cur;
-			cur=todolist(line[3..$].idup);
-		}
-		else if(line.startsWith("- ")){
-			bool done=line.startsWith("- [x]");
-			string item=done?line[6..$].idup:line[2..$].idup;
-			if(line.startsWith("- [ ]"))
-				item=line[6..$].idup;
-			cur.items~=item;
-			cur.crossed~=done;
-		}
-	}
-	if(cur.title.length)
-		col~=cur;
-	if(col.length)
-		result~=col;
-	return result;
-}
-
-void savekantban(todolist[][] data,string where){
-	auto f=File(where,"w");
-	foreach(col;data){
-		f.writeln("# Column");
-		foreach(card;col){
-			f.writeln("## ",card.title);
-			foreach(i,item;card.items){
-				bool done=i<cast(int)card.crossed.length&&card.crossed[i];
-				f.writeln(done?"- [x] ":"- [ ] ",item);
-			}
-		}
-	}
 }

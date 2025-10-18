@@ -89,3 +89,11 @@ void function() {
 - Maintain consistency with the minimalistic error handling approach of the original code
 - Implement fallback strategies instead of complex error reporting (e.g., try alternative approaches rather than detailed error messages)
 - Follow the style demonstrated in the findfont function as a model for error handling approach
+
+## Git and Pull Request Style
+- When making changes to align with the style guide, commit changes with descriptive messages
+- Use "qwen ai" as the commit author when making AI-assisted changes
+- Test all tools and functionality before creating pull requests
+- Include documentation of changes made in pull request descriptions
+- When creating pull requests, title them descriptively to explain the changes made
+- Reference the style guide in pull request descriptions when applying style changes
