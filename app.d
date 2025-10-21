@@ -2,6 +2,7 @@
 import parin;//game engine
 import format;//io of .kantban
 import drawing;
+import utility;
 import std;
 
 string file="TODO.kantban";
@@ -71,7 +72,7 @@ bool update(float dt){
 	
 	// Only try to access x[y] if y is valid and x array is not empty
 	if(y>=0 && y<cast(int)x.length && x.length>0){
-		x.clampindex(y)+=Keyboard.right.isPressed-Keyboard.left.isPressed;
+		clampindex(x, y)+=Keyboard.right.isPressed-Keyboard.left.isPressed;
 	} else {
 		if(x.length == 0) {
 			writeln("WARNING: x array is empty, navigation disabled");
@@ -137,26 +138,3 @@ void finish(){
 }
 
 mixin runGame!(ready, update, finish);
-
-// Helper function
-ref clampindex(T, I)(T[] a, ref I i){
-	if(i<0||i==I.max){
-		writeln("WARNING: clampindex called with negative or max value: ", i);
-		i=0;
-	}
-	if(a.length==0){
-		// If array is empty, just set i to 0 and extend the array with a default element
-		writeln("WARNING: clampindex called with empty array, extending with default element");
-		i=0;
-		a ~= T.init;  // Append a default-initialized element
-	}
-	if(cast(size_t)i >= a.length){
-		if(a.length == 0){
-			i = 0;
-		} else {
-			writeln("WARNING: clampindex clamping index ", i, " to ", cast(I)(a.length - 1));
-			i = cast(I)(a.length - 1);
-		}
-	}
-	return a[i];
-}
