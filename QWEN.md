@@ -194,12 +194,31 @@ The .kantban format uses a simple hierarchical structure:
 - `validate.d` - Validates kanban file format and structure
 - `fix_formatting.d` - Fixes whitespace formatting according to style guide
 
+### Beads Database (bd) Tool
+The project also integrates with the beads database tool (`bd`), a dependency-aware issue tracker. This tool can be used for managing development tasks and issues:
+
+- `bd init` - Initialize a beads database in the current directory
+- `bd create "Issue title"` - Create a new issue
+- `bd list` - List all issues
+- `bd ready` - Show issues ready to work on (no blocking dependencies)
+- `bd update <issue-id> --status <status>` - Update issue status
+- `bd close <issue-id>` - Close an issue
+- `bd dep add <issue1> <issue2>` - Add dependency relationship
+
 ### Usage
-Tools can be run directly:
+Standard tools can be run directly:
 ```bash
 ./tools/randomtoggle.d file.kantban
 ./tools/validate.d file.kantban
 ./tools/corrupt.d file.txt 10 corrupted.txt
+```
+
+The beads database tool is installed separately and run as:
+```bash
+bd init                    # Initialize database
+bd create "My issue"       # Create an issue
+bd list                    # List all issues
+bd ready                   # Show ready work
 ```
 
 ## Development Resources

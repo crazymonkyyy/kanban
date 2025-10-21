@@ -29,6 +29,31 @@ ref T clampindex(T, I)(ref T[] a, ref I i) {
     return a[i];
 }
 
+/**
+ * Clamps a value between a minimum and maximum
+ */
+T clamp(T)(T value, T min, T max) {
+    if(value < min) return min;
+    if(value > max) return max;
+    return value;
+}
+
+/**
+ * Clamps an index to be within the bounds of an array and ensures any data[i] is valid
+ * If the array is empty, adds a value using the provided init value
+ */
+T clamptoindex(T)(ref T[] data, ref int i, T init) {
+    if(data.length == 0) {
+        // If array is empty, append the init value and set index to 0
+        data ~= init;
+        i = 0;
+    } else {
+        // Clamp the index to be within valid bounds
+        i = clamp(i, 0, cast(int)data.length - 1);
+    }
+    return data[i];
+}
+
 unittest {
     // Basic functionality tests
     int[] arr = [1, 2, 3, 4, 5];
@@ -128,6 +153,46 @@ unittest {
     }
     
     writeln("Fuzzing tests for clampindex passed!");
+}
+
+/// Unit tests for clamptoindex function
+unittest {
+    // Test 1: Empty array case
+    int[] emptyArr;
+    int idx = 5;  // Any index should become 0 for empty array
+    int result = clamptoindex(emptyArr, idx, 42);  // Using 42 as init value
+    assert(emptyArr.length == 1, "Empty array should have 1 element after clamptoindex");
+    assert(emptyArr[0] == 42, "First element should be the init value");
+    assert(idx == 0, "Index should be set to 0 for empty array");
+    assert(result == 42, "Function should return the init value");
+    
+    // Test 2: Index too high
+    int[] arr = [10, 20, 30];
+    idx = 5;  // Out of bounds
+    result = clamptoindex(arr, idx, 99);  // init value shouldn't be used
+    assert(idx == 2, "Index should be clamped to array length - 1");
+    assert(result == 30, "Function should return the last element");
+    
+    // Test 3: Index too low (negative)
+    idx = -3;  // Negative index
+    result = clamptoindex(arr, idx, 99);  // init value shouldn't be used
+    assert(idx == 0, "Index should be clamped to 0");
+    assert(result == 10, "Function should return the first element");
+    
+    // Test 4: Valid index
+    idx = 1;  // Valid index
+    result = clamptoindex(arr, idx, 99);  // init value shouldn't be used
+    assert(idx == 1, "Index should remain unchanged when valid");
+    assert(result == 20, "Function should return the element at the valid index");
+    
+    // Test 5: Boundary case - exact length
+    arr = [100, 200, 300];
+    idx = 3;  // Exactly at the length (one past last valid index)
+    result = clamptoindex(arr, idx, 999);
+    assert(idx == 2, "Index should be clamped to length - 1");
+    assert(result == 300, "Function should return the last element");
+    
+    writeln("All clamptoindex tests passed!");
 }
 
 /// When compiled with -unittest flag, this module will run its unit tests

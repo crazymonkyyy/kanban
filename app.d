@@ -9,132 +9,81 @@ string file="TODO.kantban";
 todolist[][] data;
 int[] x;
 int y;
+bool aiMode = false;
+bool screenshotTaken = false;
+
 void ready(){
 	// Check for command line arguments
 	auto args=envArgs();
-	if(args.length>1){
-		file=args[1].to!string;
-	}
-
-	// Check if file exists before attempting to open
-	if(!std.file.exists(file)) {
-		writeln("WARNING: File does not exist: ", file);
-		writeln("Creating empty data structure and continuing...");
-		data = []; // Initialize as empty array
-	} else {
-		data=openkantban(file);
-		writeln("INFO: Loaded ", data.length, " columns from ", file);
-		
-		// Additional warnings for empty data
-		if(data.length == 0) {
-			writeln("WARNING: File is empty or contains no valid columns");
-		} else {
-			int totalCards = 0;
-			int totalItems = 0;
-			foreach(column; data) {
-				totalCards += column.length;
-				foreach(card; column) {
-					totalItems += card.items.length;
-				}
-			}
-			writeln("INFO: Loaded ", totalCards, " cards and ", totalItems, " items");
+	
+	// Parse arguments properly
+	for(size_t i = 1; i < args.length; i++) {
+		if(args[i] == "-ai") {
+			aiMode = true;
+		} else if(args[i][0] != '-' && args[i] != "--") {  // Skip flags and separator
+			// This should be the file path
+			file = args[i].to!string;
 		}
 	}
+
+	// Load data from file
+	data=openkantban(file);
 	
-	// Initialize drawing after checking data
+	// Initialize drawing
 	initdrawing;
+
 	x.length=data.length;
-	
-	// Check if x array was properly initialized
-	if(x.length != data.length) {
-		writeln("ERROR: Failed to initialize x array properly");
-		writeln("WARNING: Attempting to fix x array length");
-		x.length = data.length;
-	}
 }
 
 bool update(float dt){
-	// Check for data consistency
-	if(x.length != data.length) {
-		writeln("ERROR: x.length (", x.length, ") != data.length (", data.length, ") - inconsistent state");
-		// Try to recover by resizing x to match data
-		x.length = data.length;
-	}
-	
+	// Handle navigation
 	y+=Keyboard.down.isPressed-Keyboard.up.isPressed;
 	
-	// Clamp y to valid range
-	if(y<0) y=0;
-	if(y>=cast(int)data.length) {
-		writeln("WARNING: y clamped from ", y, " to ", cast(int)data.length-1);
-		y=cast(int)data.length-1;
+	// Use clamptoindex to safely handle y index for both data and x arrays
+	// This ensures that if either array is empty, it gets initialized properly
+	if(data.length == 0) {
+		return true;
 	}
 	
-	// Only try to access x[y] if y is valid and x array is not empty
-	if(y>=0 && y<cast(int)x.length && x.length>0){
-		clampindex(x, y)+=Keyboard.right.isPressed-Keyboard.left.isPressed;
+	// Clamp y to valid range for data array
+	y=utility.clamp(y, 0, cast(int)data.length-1);
+	
+	// Use utility.clamptoindex to ensure safe access to x[y]
+	// This will handle empty x array or extend it if needed
+	utility.clamptoindex(x, y, 0); // Ensure x has value for index y
+	
+	// Update the x value for the current column
+	x[y] += Keyboard.right.isPressed-Keyboard.left.isPressed;
+	
+	// Clamp x[y] based on the length of the corresponding column in data
+	if(y < data.length && data[y].length > 0) {
+		x[y] = utility.clamp(x[y], 0, cast(int)data[y].length-1);
 	} else {
-		if(x.length == 0) {
-			writeln("WARNING: x array is empty, navigation disabled");
-		} else {
-			writeln("WARNING: Invalid index access attempt: y=", y, ", x.length=", x.length);
-		}
+		x[y] = 0; // Reset to 0 if no items in this column
 	}
 
-	// Clamp x index to valid range for the current column
-	if(y>=0 && y<cast(int)data.length && x.length>0 && y<x.length){
-		if(x[y]<0) {
-			writeln("WARNING: x[", y, "] clamped from ", x[y], " to 0");
-			x[y]=0;
-		}
-		if(x[y]>=cast(int)data[y].length) {
-			writeln("WARNING: x[", y, "] clamped from ", x[y], " to ", cast(int)data[y].length-1);
-			x[y]=cast(int)data[y].length-1;
-		}
+	// Draw the board
+	if(y < data.length && data[y].length > 0) {
+		draw(data, x, y);
 	} else {
-		if(data.length == 0) {
-			writeln("WARNING: No data available to display");
-		} else if(y >= data.length) {
-			writeln("WARNING: y index (", y, ") out of bounds for data (length ", data.length, ")");
-		}
+		assert(0);
+		//return true;
 	}
-
-	// Ensure y is within bounds before drawing
-	if(y>=0 && y<cast(int)data.length){
-		if(data.length > 0 && y < data.length && data[y].length > 0) {
-			draw(data,x,y);
-		} else {
-			writeln("WARNING: Attempting to draw with empty data at index y=", y);
-			// Draw with valid index if possible
-			if(data.length > 0) {
-				// Find first non-empty column to draw
-				int firstValidColumn = -1;
-				for(int i = 0; i < cast(int)data.length; i++) {
-					if(data[i].length > 0) {
-						firstValidColumn = i;
-						break;
-					}
-				}
-				if(firstValidColumn >= 0) {
-					draw(data, x, firstValidColumn);
-				} else {
-					writeln("WARNING: All columns are empty, nothing to draw");
-				}
-			}
-		}
-	} else {
-		// If y is out of bounds, draw with a valid index
-		if(data.length>0){
-			writeln("WARNING: y out of bounds (", y, "), drawing with index 0");
-			draw(data,x,0);
-		} else {
-			writeln("WARNING: No data to draw");
-		}
+	
+	// If in AI mode, take a screenshot on the first frame and then exit
+	if(aiMode && !screenshotTaken) {
+		takeScreenshot();
+		screenshotTaken = true;
+		//return true; // This will cause the game loop to exit after this frame
 	}
+	
 	return false;
 }
 
-void finish(){
+void takeScreenshot() {
+	// Using parin's takescreenshot function to capture the screen
+	takescreenshot("kanban_screenshot.png");
 }
 
+void finish(){}
 mixin runGame!(ready, update, finish);

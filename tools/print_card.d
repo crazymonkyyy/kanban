@@ -1,48 +1,53 @@
-#!/usr/bin/env -S opend -run tools/print_card.d
-import std;
-import format;
+#!/usr/bin/dmd -run
+import std.stdio;
+import std.file;
+import std.string;
+import std.array;
+import std.path;
+import std.conv;
 
-int main(string[] args) {
+import format; // Import the format module to use the parsing functions
+
+void main(string[] args) {
     if (args.length < 4) {
-        writeln("Usage: ", args[0], " <file.kantban> <x> <y>");
-        writeln("Prints the todo card at the specified x,y coordinates");
-        return 1;
+        writeln("Usage: ", baseName(args[0]), " <file.kantban> <x> <y>");
+        writeln("  <file.kantban> - Path to the .kantban file");
+        writeln("  <x> - Column index (0-based)");
+        writeln("  <y> - Card index within column (0-based)");
+        return;
     }
 
-    string filename = args[1];
-    int x = args[2].to!int;
-    int y = args[3].to!int;
+    string filePath = args[1];
+    int x = to!int(args[2]);
+    int y = to!int(args[3]);
 
     // Check if file exists
-    if (!std.file.exists(filename)) {
-        writeln("Error: File does not exist: ", filename);
-        return 1;
+    if (!exists(filePath)) {
+        writeln("Error: File '", filePath, "' does not exist.");
+        return;
     }
 
-    // Load the kanban data
-    auto data = openkantban(filename);
+    // Parse the file directly using the file path
+    auto board = openkantban(filePath);
 
-    // Check if coordinates are valid
-    if (y < 0 || y >= cast(int)data.length) {
-        writeln("Error: y coordinate out of bounds. Valid range: 0 to ", data.length - 1);
-        return 1;
+    // Validate indices
+    if (x < 0 || x >= board.length) {
+        writeln("Error: Column index ", x, " is out of bounds. Valid range: 0 to ", board.length - 1);
+        return;
     }
 
-    if (x < 0 || x >= cast(int)data[y].length) {
-        writeln("Error: x coordinate out of bounds for column ", y, ". Valid range: 0 to ", data[y].length - 1);
-        return 1;
+    if (y < 0 || y >= board[x].length) {
+        writeln("Error: Card index ", y, " is out of bounds for column ", x, ". Valid range: 0 to ", board[x].length - 1);
+        return;
     }
 
-    // Print the card at the specified coordinates
-    auto card = data[y][x];
-    writeln("Card at [", y, "][", x, "]:");
+    // Print the specific card
+    auto card = board[x][y];
+    writeln("Column ", x, ", Card ", y, ":");
     writeln("Title: ", card.title);
     writeln("Items:");
-    
     foreach(i, item; card.items) {
-        string status = (i < card.crossed.length && card.crossed[i]) ? "[x]" : "[ ]";
-        writeln("  ", status, " ", item);
+        string status = card.crossed[i] ? "[x] " : "[ ] ";
+        writeln("  ", status, item);
     }
-
-    return 0;
 }
