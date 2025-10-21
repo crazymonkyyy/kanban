@@ -24,6 +24,11 @@ void draw(todolist[][] data,int[] xs,int ys){
 	// Draw mathematical pattern background
 	drawMathBackground();
 
+	// Check if data is empty before accessing data[0][0]
+	if(data.length == 0 || data[0].length == 0) {
+		return; // Nothing to draw
+	}
+	
 	auto r=estimate(data[0][0]);
 	foreach(int y,list;data){
 	foreach(int x,e;list){

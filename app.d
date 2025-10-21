@@ -61,8 +61,8 @@ bool update(float dt){
 	if(y < data.length && data[y].length > 0) {
 		draw(data, x, y);
 	} else {
-		assert(0);
-		//return true;
+		// Instead of crashing, handle empty data gracefully
+		// Just continue without drawing
 	}
 	
 	// If in AI mode, take a screenshot on the first frame and then exit

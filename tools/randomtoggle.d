@@ -11,8 +11,11 @@ void main(string[] args){
 
 	string filename=args[1];
 
-	// Minimal error handling following original style
-	assert(exists(filename),"File not found");
+	// Check if file exists and handle error gracefully
+	if(!exists(filename)) {
+		writeln(\"Error: File not found: \", filename);
+		return;
+	}
 
 	if(!filename.endsWith(".kantban")){
 		writeln("Warning: File doesn't have .kantban extension");

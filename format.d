@@ -19,19 +19,31 @@ todolist[][] openkantban(string where){
 	todolist cur;
 	foreach(line;File(where).byLineCopy){
 		if(line.startsWith("# ")){
+			// If there's an existing card being processed, add it to the column
 			if(cur.title.length)
 				col~=cur;
+			// If there's an existing column, add it to the result
 			if(col.length)
 				result~=col;
+			// Start a new column
 			col=[];
+			// Reset current card
 			cur=todolist();
 		}
 		else if(line.startsWith("## ")){
+			// If there's an existing card being processed, add it to the column
 			if(cur.title.length)
 				col~=cur;
+			// Start a new card
 			cur=todolist(line[3..$].idup);
 		}
 		else if(line.startsWith("- ")){
+			// If there's no current card but we have items, create a default card
+			if(!cur.title.length && col.length == 0) {
+				// If we're not in a column yet, create a default one
+				cur = todolist("Default");
+			}
+			
 			bool done=false;
 			string item;
 
@@ -56,8 +68,10 @@ todolist[][] openkantban(string where){
 			cur.crossed~=done;
 		}
 	}
+	// Add any remaining card to the column
 	if(cur.title.length)
 		col~=cur;
+	// Add any remaining column to the result
 	if(col.length)
 		result~=col;
 	return result;
