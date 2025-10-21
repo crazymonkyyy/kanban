@@ -654,6 +654,11 @@ void _openWindowC(int width, int height, int argc, ICStr* argv, ICStr title = "P
 
 /// Use by the `updateWindow` function.
 /// You should avoid calling this function manually.
+bool takescreenshot_monkyyywashere=false;
+string screenshotpath_="screenshot.png";
+void takescreenshot(string s){
+    takescreenshot_monkyyywashere=true;
+}
 bool _updateWindowLoop() {
 	// Update buffers and resources.
 	bk.pumpEvents();
@@ -710,7 +715,12 @@ bool _updateWindowLoop() {
 	} else {
 		bk.endDrawing();
 	}
-
+    
+    //monkyyy was here
+    if(takescreenshot_monkyyywashere){
+        rl.TakeScreenshot(&screenshotpath_[0]);
+    }
+    
 	// Viewport code.
 	if (_engineState.viewport.isChanging) {
 		if (_engineState.viewport.isLocking) {
