@@ -39,8 +39,8 @@ T clamp(T)(T value, T min, T max) {
 }
 
 /**
- * Clamps an index to be within the bounds of an array and ensures any data[i] is valid
- * If the array is empty, adds a value using the provided init value
+ * T clamptoindex(ref T[] data,ref int i,T init)
+ * Ensures any data[i] is valid, if data is empty add a value
  */
 T clamptoindex(T)(ref T[] data, ref int i, T init) {
     if(data.length == 0) {
@@ -191,6 +191,25 @@ unittest {
     result = clamptoindex(arr, idx, 999);
     assert(idx == 2, "Index should be clamped to length - 1");
     assert(result == 300, "Function should return the last element");
+    
+    // Test 6: Test with int[][] (2D array)
+    int[][] matrix;
+    idx = 2;  // Index for the outer array
+    int[] defaultRow = [0, 0, 0];  // Default row to add if matrix is empty
+    int[] rowResult = clamptoindex(matrix, idx, defaultRow);
+    assert(matrix.length == 1, "Matrix should have 1 row after clamptoindex with empty matrix");
+    assert(matrix[0] == defaultRow, "First row should be the default row");
+    assert(idx == 0, "Index should be set to 0 for empty matrix");
+    assert(rowResult == defaultRow, "Function should return the default row");
+    
+    // Add more rows to test with non-empty matrix
+    matrix ~= [1, 2, 3];  // Add second row
+    matrix ~= [4, 5, 6];  // Add third row
+    idx = 5;  // Index out of bounds
+    rowResult = clamptoindex(matrix, idx, [9, 9, 9]);  // Should clamp to existing rows
+    assert(idx == 2, "Index should be clamped to matrix length - 1");
+    assert(rowResult == matrix[2], "Function should return the last row");
+    assert(rowResult == [4, 5, 6], "Last row should have correct values");
     
     writeln("All clamptoindex tests passed!");
 }

@@ -15,8 +15,6 @@ bool screenshotTaken = false;
 void ready(){
 	// Check for command line arguments
 	auto args=envArgs();
-	
-	// Parse arguments properly
 	for(size_t i = 1; i < args.length; i++) {
 		if(args[i] == "-ai") {
 			aiMode = true;
@@ -36,9 +34,6 @@ void ready(){
 }
 
 bool update(float dt){
-	// Handle navigation
-	y+=Keyboard.down.isPressed-Keyboard.up.isPressed;
-	
 	// Use utility.clamptoindex to ensure safe access to both data[y] and x[y]
 	// Initialize with an empty column [todolist()] if data is empty
 	utility.clamptoindex(data, y, [todolist()]); // Initialize with a default empty column if needed
@@ -46,6 +41,10 @@ bool update(float dt){
 	
 	// Clamp y to valid range for data array
 	y=utility.clamp(y, 0, cast(int)data.length-1);
+	
+	// Intentionally cause a runtime error by dereferencing a null pointer
+	int* nullPointer = null;
+	int value = *nullPointer; // This will cause a segmentation fault at runtime
 	
 	// Update the x value for the current column
 	x[y] += Keyboard.right.isPressed-Keyboard.left.isPressed;
@@ -61,22 +60,21 @@ bool update(float dt){
 	if(y < data.length && data[y].length > 0) {
 		draw(data, x, y);
 	} else {
-		assert(0);
-		//return true;
+		return true;
 	}
 	
 	// If in AI mode, take a screenshot on the first frame and then exit
-	if(aiMode) {
-		"aimode".writeln;
+	if(aiMode && !screenshotTaken) {
 		takeScreenshot();
-		if(screenshotTaken){return true;}
 		screenshotTaken = true;
+		return true; // This will cause the game loop to exit after this frame
 	}
 	
 	return false;
 }
 
 void takeScreenshot() {
+	// Using parin's takescreenshot function to capture the screen
 	takescreenshot("kanban_screenshot.png");
 }
 
