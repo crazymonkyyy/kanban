@@ -31,6 +31,16 @@ void watchfile(Duration iolimit=dur!"msecs"(500),F)(string file, F func){
 	if(file.startsWith("syntaxtest")){
 		folder="syntaxtest";
 	}
+	
+	// Ensure the folder exists before creating the watcher
+	try {
+		if (!std.file.exists(folder)) {
+			std.file.mkdir(folder);
+		}
+	} catch (Exception e) {
+		// If we can't create the folder, continue anyway
+	}
+	
 	auto w = new DirectoryWatcher(FilePath(folder),file,true,(path, op) {
 		static SysTime io;
 		//file[folder.length+1..$].writeln;

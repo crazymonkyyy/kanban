@@ -82,7 +82,10 @@ string findfont(string font=""){
 			if (verbose) {
 				writeln("attempting download to:", file);
 			}
-			//NOTE: curl is not always seccessful at creating the file if the folder doesnt exist
+			//NOTE: curl is not always successful at creating the file if the folder doesn't exist
+			// Create the directory if it doesn't exist
+			string dir = file[0 .. file.lastIndexOf('/')];
+			exe("mkdir -p \"" ~ dir ~ "\"");
 			exe("curl \"" ~ s ~ "\" --output " ~ file ~ "\"").writeln;
 			return file;
 		}
